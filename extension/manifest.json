@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "LinkLab Replika Exporter",
+  "version": "0.1.0",
+  "description": "Export Replika chat history to the LinkLab CSV format.",
+  "action": {
+    "default_popup": "export.html"
+  },
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": [
+    "https://replika.com/*",
+    "https://*.replika.com/*",
+    "https://replika.ai/*",
+    "https://*.replika.ai/*",
+    "wss://ws.replika.ai/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://replika.com/*",
+        "https://*.replika.com/*",
+        "https://replika.ai/*",
+        "https://*.replika.ai/*"
+      ],
+      "js": ["contentScript.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["pageBridge.js"],
+      "matches": [
+        "https://replika.com/*",
+        "https://*.replika.com/*",
+        "https://replika.ai/*",
+        "https://*.replika.ai/*"
+      ]
+    }
+  ]
+}
