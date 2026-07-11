@@ -45,7 +45,7 @@ test("extension UI and bridge files are present", async () => {
 test("extension UI asks for PID with a clear 040 example", async () => {
   const html = await readFile("extension/export.html", "utf8");
 
-  assert.match(html, /<label for="participant-id">PID<\/label>/);
+  assert.match(html, /<label for="participant-id">Participant ID \(PID\)<\/label>/);
   assert.match(html, /placeholder="Example: 040"/);
   assert.match(html, /Enter the participant PID, for example 040\./);
   assert.match(html, /The file will download as P040\.csv\./);
