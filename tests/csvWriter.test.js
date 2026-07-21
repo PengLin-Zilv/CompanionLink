@@ -93,3 +93,7 @@ test("builds Python csv.writer compatible CSV text", () => {
       "2026-07-08 16:36:32,Me,Sometimes I think it\\nspills over,None,msg-me-old\r\n"
   );
 });
+
+test("builds a header-only CSV when the study window has no messages", () => {
+  assert.equal(buildCsv([]), "Timestamp,From,Text,Reaction,ID\r\n");
+});

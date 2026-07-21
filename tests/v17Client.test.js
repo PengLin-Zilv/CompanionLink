@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+import { createStudyWindow } from "../extension/studyWindow.js";
 import { exportHistory } from "../extension/v17Client.js";
 
 class FakeWebSocket {
@@ -112,4 +113,85 @@ test("mirrors chat_backup.py v17 event order and paginates by last_message_id", 
   const rows = await exportPromise;
   assert.equal(socket.closeCount, 1);
   assert.deepEqual(rows.map((row) => row.ID), ["newest-in-batch", "oldest-in-batch"]);
+});
+
+test("filters to the study window and stops after crossing the start boundary", async () => {
+  FakeWebSocket.instances = [];
+
+  const initMessage = JSON.stringify({
+    event_name: "init",
+    payload: {},
+    token: "client-token",
+    auth: {
+      user_id: "10",
+      auth_token: "auth-token",
+      device_id: "device-id"
+    }
+  });
+  const studyWindow = createStudyWindow({
+    startDate: "2026-07-08",
+    submittedAt: new Date("2026-07-08T20:36:41.000Z")
+  });
+  const exportPromise = exportHistory({
+    initMessage,
+    WebSocketCtor: FakeWebSocket,
+    studyWindow
+  });
+
+  await Promise.resolve();
+  const socket = FakeWebSocket.instances[0];
+  socket.emit({ event_name: "init", token: "server-1", payload: {} });
+  socket.emit({ event_name: "chat_screen", token: "server-2", payload: {} });
+  socket.emit({ event_name: "application_started", token: "server-3", payload: {} });
+  socket.emit({ event_name: "app_foreground", token: "server-4", payload: {} });
+  socket.emit({
+    event_name: "history",
+    token: "server-5",
+    payload: {
+      message_reactions: [],
+      messages: [
+        {
+          id: "before-study",
+          meta: {
+            timestamp: "2026-07-08T03:59:59.999Z",
+            nature: "Customer"
+          },
+          content: { text: "before" }
+        },
+        {
+          id: "inside-window",
+          meta: {
+            timestamp: "2026-07-08T20:36:40.000Z",
+            nature: "Robot"
+          },
+          content: { text: "inside" }
+        },
+        {
+          id: "at-submit-time",
+          meta: {
+            timestamp: "2026-07-08T20:36:41.000Z",
+            nature: "Robot"
+          },
+          content: { text: "too late" }
+        }
+      ]
+    }
+  });
+
+  const historyRequests = socket.sent.filter((event) => event.event_name === "history");
+  if (socket.closeCount === 0) {
+    socket.emit({
+      event_name: "history",
+      token: "server-6",
+      payload: {
+        message_reactions: [],
+        messages: []
+      }
+    });
+  }
+  const rows = await exportPromise;
+
+  assert.deepEqual(rows.map((row) => row.ID), ["inside-window"]);
+  assert.equal(historyRequests.length, 1);
+  assert.equal(socket.closeCount, 1);
 });

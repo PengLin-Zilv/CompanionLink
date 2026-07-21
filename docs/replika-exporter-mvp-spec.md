@@ -11,7 +11,9 @@
 - Participant logs into Replika web in their own browser.
 - Participant opens the LinkLab extension.
 - Participant enters an ID such as `040`.
+- Participant selects the required study start date.
 - Extension downloads `P040.csv`.
+- CSV includes only messages in `[study start, submit time)`.
 - CSV header is exactly `Timestamp,From,Text,Reaction,ID`.
 - CSV rows preserve the current `chat_backup.py` semantics.
 - Replika auth token, device ID, user ID, chat ID, email, password, and profile data are not written to CSV or sent to LinkLab.
@@ -72,6 +74,16 @@ message.id
   -> ID
 ```
 
+#### Study Window
+
+- Study start date is required.
+- Interpret the selected date from `00:00:00 America/New_York`.
+- Capture submit time exactly once when the participant submits the popup form.
+- Include messages where `study_start <= message_timestamp < submit_time`.
+- Reject future study start dates.
+- Do not add the date or submit time to the CSV.
+- Download a header-only CSV when no messages fall inside the window.
+
 #### v17 Flow
 
 - Open `wss://ws.replika.ai/v17`.
@@ -80,9 +92,9 @@ message.id
 - On server `chat_screen`, send `application_started`.
 - On server `application_started`, send `app_foreground`.
 - On server `app_foreground`, send initial `history` with `limit: 1000`.
-- For every `history` response, process messages from last index to first index.
+- For every `history` response, keep only messages inside the study window, then process them from last index to first index.
 - Request older history with `last_message_id` set to the final processed message ID.
-- Stop when the server returns an empty `messages` array.
+- Stop when the server returns an empty `messages` array or the oldest message in a processed batch predates the study start.
 
 #### Privacy Boundary
 
@@ -96,6 +108,7 @@ message.id
 ```text
 extension/export.html
   -> extension/export.js
+  -> extension/studyWindow.js
   -> extension/sessionBridge.js
   -> extension/v17Client.js
   -> extension/csvWriter.js
@@ -106,6 +119,7 @@ extension/contentScript.js
 ```
 
 - `csvWriter.js` owns CSV conversion, New York timestamp formatting, CSV escaping, and filename normalization.
+- `studyWindow.js` owns the New York study-start boundary and exact submit-time comparison.
 - `v17Client.js` owns WebSocket sequencing and history pagination.
 - `pageBridge.js` runs in the Replika page context and captures the raw v17 init message when available.
 - `contentScript.js` keeps the latest init message in memory and responds to extension requests.
@@ -117,6 +131,7 @@ extension/contentScript.js
 - Unit tests verify filename normalization.
 - Unit tests verify CSV header, row order, timestamp conversion, sender mapping, reaction fallback, newline escaping, and CSV quoting.
 - Unit tests verify v17 event sequencing and `last_message_id` pagination using a fake WebSocket.
+- Unit tests verify New York date boundaries, future-date rejection, message filtering, and pagination stopping.
 - Static tests verify required extension files and manifest permissions.
 - Live Replika export is a manual verification step because it requires an authenticated participant browser session.
 
@@ -129,3 +144,4 @@ extension/contentScript.js
 - Third-party proxy services.
 - Persistent Replika auth/session storage.
 - Alternate CSV schemas or extra columns.
+- Study end date, multiple study windows, or a timezone selector.

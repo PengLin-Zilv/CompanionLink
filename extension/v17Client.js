@@ -7,6 +7,7 @@ export function exportHistory({
   initMessage,
   WebSocketCtor = globalThis.WebSocket,
   chatId,
+  studyWindow,
   onProgress = () => {}
 }) {
   if (!initMessage) {
@@ -68,8 +69,25 @@ export function exportHistory({
             return;
           }
 
-          rows.push(...messagesToRows(serverEvent));
+          const includedMessages = studyWindow
+            ? messages.filter((message) => studyWindow.includes(message.meta.timestamp))
+            : messages;
+          rows.push(...messagesToRows({
+            ...serverEvent,
+            payload: {
+              ...serverEvent.payload,
+              messages: includedMessages
+            }
+          }));
           onProgress(rows.length);
+
+          if (studyWindow?.isOlderThanStart(messages[0].meta.timestamp)) {
+            settled = true;
+            socket.close();
+            resolve(rows);
+            return;
+          }
+
           sendHistoryRequest(socket, token, auth, resolvedChatId, messages[0].id);
         }
       } catch (error) {

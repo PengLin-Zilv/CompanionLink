@@ -41,6 +41,10 @@
         line-height: 1.35;
       }
 
+      .hint + label {
+        margin-top: 12px;
+      }
+
       input {
         box-sizing: border-box;
         width: 100%;
@@ -89,6 +93,9 @@
         <label for="participant-id">Participant ID (PID)</label>
         <input id="participant-id" name="participant-id" autocomplete="off" placeholder="Example: 040" aria-describedby="pid-hint" required>
         <p id="pid-hint" class="hint">Enter the participant PID, for example 040. The file will download as P040.csv.</p>
+        <label for="study-start-date">Study start date</label>
+        <input id="study-start-date" name="study-start-date" type="date" aria-describedby="study-start-hint" required>
+        <p id="study-start-hint" class="hint">Messages before this date will not be included.</p>
         <button id="export-button" type="submit">Export CSV</button>
       </form>
       <p id="status" role="status" aria-live="polite"></p>

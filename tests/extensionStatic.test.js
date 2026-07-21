@@ -33,6 +33,7 @@ test("extension UI and bridge files are present", async () => {
     "extension/contentScript.js",
     "extension/pageBridge.js",
     "extension/v17Client.js",
+    "extension/studyWindow.js",
     "extension/csvWriter.js"
   ];
 
@@ -50,4 +51,16 @@ test("extension UI asks for PID with a clear 040 example", async () => {
   assert.match(html, /Enter the participant PID, for example 040\./);
   assert.match(html, /The file will download as P040\.csv\./);
   assert.doesNotMatch(html, /<label for="participant-id">Participant Number<\/label>/);
+});
+
+test("extension UI requires a study start date and submits one study window", async () => {
+  const html = await readFile("extension/export.html", "utf8");
+  const script = await readFile("extension/export.js", "utf8");
+
+  assert.match(html, /<label for="study-start-date">Study start date<\/label>/);
+  assert.match(html, /<input id="study-start-date"[^>]*type="date"[^>]*required>/);
+  assert.match(script, /import \{ createStudyWindow \} from "\.\/studyWindow\.js";/);
+  assert.equal(script.match(/new Date\(\)/g)?.length, 1);
+  assert.match(script, /startDate: studyStartDateInput\.value,\s+submittedAt/);
+  assert.match(script, /exportHistory\(\{[\s\S]*studyWindow,/);
 });
