@@ -11,9 +11,9 @@
 - Participant logs into Replika web in their own browser.
 - Participant opens the LinkLab extension.
 - Participant enters an ID such as `040`.
-- Participant selects the required study start date.
+- Participant selects required From and To dates.
 - Extension downloads `P040.csv`.
-- CSV includes only messages in `[study start, submit time)`.
+- CSV includes only messages inside the inclusive New York calendar-date range.
 - CSV header is exactly `Timestamp,From,Text,Reaction,ID`.
 - CSV rows preserve the current `chat_backup.py` semantics.
 - Replika auth token, device ID, user ID, chat ID, email, password, and profile data are not written to CSV or sent to LinkLab.
@@ -76,12 +76,15 @@ message.id
 
 #### Study Window
 
-- Study start date is required.
-- Interpret the selected date from `00:00:00 America/New_York`.
+- From and To dates are required.
+- Interpret both as `America/New_York` calendar dates.
+- Begin at midnight on the From date.
+- Represent the inclusive To date with an exclusive boundary at the following midnight.
 - Capture submit time exactly once when the participant submits the popup form.
-- Include messages where `study_start <= message_timestamp < submit_time`.
-- Reject future study start dates.
-- Do not add the date or submit time to the CSV.
+- Cap the end boundary at submit time when the To date is today.
+- Include messages where `from_boundary <= message_timestamp < effective_end`.
+- Reject a From date after the To date and reject a future To date.
+- Do not add either date or submit time to the CSV.
 - Download a header-only CSV when no messages fall inside the window.
 
 #### v17 Flow
@@ -94,7 +97,7 @@ message.id
 - On server `app_foreground`, send initial `history` with `limit: 1000`.
 - For every `history` response, keep only messages inside the study window, then process them from last index to first index.
 - Request older history with `last_message_id` set to the final processed message ID.
-- Stop when the server returns an empty `messages` array or the oldest message in a processed batch predates the study start.
+- Stop when the server returns an empty `messages` array or the oldest message in a processed batch predates the From boundary.
 
 #### Privacy Boundary
 
@@ -144,4 +147,4 @@ extension/contentScript.js
 - Third-party proxy services.
 - Persistent Replika auth/session storage.
 - Alternate CSV schemas or extra columns.
-- Study end date, multiple study windows, or a timezone selector.
+- Multiple study windows or a timezone selector.

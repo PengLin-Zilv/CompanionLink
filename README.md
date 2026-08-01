@@ -20,7 +20,7 @@ with this participant-facing process:
 Replika web
 -> LinkLab Replika Exporter
 -> enter Participant ID (PID), for example 040
--> select the study start date
+-> select From and To dates
 -> download P040.csv
 ```
 
@@ -28,13 +28,13 @@ Replika web
 
 This is an MVP Chrome extension. It has been verified with automated tests and one live Replika export.
 
-The extension exports text chat from the selected study start date through the moment the participant submits the form. It does not export images, voice, diary, memory, analytics, or profile data.
+The extension exports text chat inside the selected inclusive From/To date range. It does not export images, voice, diary, memory, analytics, or profile data.
 
 ## Study Period
 
-The study start date is required. The selected date begins at `00:00:00 America/New_York`, and the export ends at the instant the participant clicks **Export CSV**. Messages before the selected date and messages at or after that submit time are excluded.
+Both dates are required and interpreted as `America/New_York` calendar dates. The From date begins at midnight, and the To date includes its entire day. If the To date is today, the export includes messages only through the instant the participant clicks **Export CSV**.
 
-The date is used only in extension memory. It is not added to the CSV or persisted after export.
+The dates are used only in extension memory. They are not added to the CSV or persisted after export.
 
 ## CSV Contract
 
@@ -107,7 +107,7 @@ linklab-replika-exporter/extension
 040
 ```
 
-6. Select the study start date provided by the research team.
+6. Select the From and To dates provided by the research team.
 7. Click **Export CSV**.
 8. Confirm the browser downloaded:
 
@@ -156,7 +156,7 @@ extension/
   contentScript.js    Replika tab bridge
   pageBridge.js       Page-context v17 init capture
   v17Client.js        Replika v17 WebSocket flow
-  studyWindow.js      Study date boundary and timestamp filtering
+  studyWindow.js      Inclusive From/To date filtering
   csvWriter.js        CSV mapping and filename normalization
 
 tests/
@@ -167,6 +167,7 @@ tests/
 
 docs/
   replika-exporter-mvp-spec.md
+  study-start-date-filter-spec.md
 ```
 
 ## Reference

@@ -130,6 +130,7 @@ test("filters to the study window and stops after crossing the start boundary", 
   });
   const studyWindow = createStudyWindow({
     startDate: "2026-07-08",
+    endDate: "2026-07-08",
     submittedAt: new Date("2026-07-08T20:36:41.000Z")
   });
   const exportPromise = exportHistory({

@@ -53,14 +53,20 @@ test("extension UI asks for PID with a clear 040 example", async () => {
   assert.doesNotMatch(html, /<label for="participant-id">Participant Number<\/label>/);
 });
 
-test("extension UI requires a study start date and submits one study window", async () => {
+test("extension UI requires From and To dates and submits one study window", async () => {
   const html = await readFile("extension/export.html", "utf8");
   const script = await readFile("extension/export.js", "utf8");
 
-  assert.match(html, /<label for="study-start-date">Study start date<\/label>/);
-  assert.match(html, /<input id="study-start-date"[^>]*type="date"[^>]*required>/);
+  assert.match(html, /<label for="from-date">From date<\/label>/);
+  assert.match(html, /<input id="from-date"[^>]*type="date"[^>]*required>/);
+  assert.match(html, /<label for="to-date">To date<\/label>/);
+  assert.match(html, /<input id="to-date"[^>]*type="date"[^>]*required>/);
+  assert.match(html, /Both dates are included\./);
+  assert.doesNotMatch(html, /study-start-date/);
   assert.match(script, /import \{ createStudyWindow \} from "\.\/studyWindow\.js";/);
   assert.equal(script.match(/new Date\(\)/g)?.length, 1);
-  assert.match(script, /startDate: studyStartDateInput\.value,\s+submittedAt/);
+  assert.match(script, /startDate: fromDateInput\.value,\s+endDate: toDateInput\.value/);
+  assert.match(script, /fromDateInput\.disabled = isWorking/);
+  assert.match(script, /toDateInput\.disabled = isWorking/);
   assert.match(script, /exportHistory\(\{[\s\S]*studyWindow,/);
 });

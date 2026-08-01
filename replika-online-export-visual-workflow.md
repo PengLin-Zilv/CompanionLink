@@ -19,7 +19,7 @@ with an online-participant workflow:
 ```text
 Replika web
 -> LinkLab Chrome extension
--> enter Participant ID and study start date
+-> enter Participant ID and From/To dates
 -> download P{participant_id}.csv
 -> upload P{participant_id}.csv to LinkLab
 ```
@@ -48,9 +48,9 @@ Success criteria:
 
 - Participant logs into Replika web in their own browser.
 - Participant enters Participant ID once, such as `040`.
-- Participant selects the required study start date.
+- Participant selects required From and To dates.
 - Tool downloads `P040.csv`.
-- CSV includes only messages from New York midnight on the study start date through the submit instant.
+- CSV includes only messages inside the inclusive New York calendar-date range.
 - CSV exactly matches the current five-column format.
 - No Replika password, auth token, device ID, email, or profile data leaves the browser.
 
@@ -69,7 +69,7 @@ flowchart TD
     A["Participant opens Replika web"] --> B["Participant logs in"]
     B --> C["Participant opens LinkLab extension"]
     C --> D["Enter Participant ID"]
-    D --> E["Select study start date"]
+    D --> E["Select From and To dates"]
     E --> F["Click Export"]
     F --> G["Extension reads Replika session locally"]
     G --> H["Extension runs v17 export flow"]
@@ -80,7 +80,7 @@ flowchart TD
 
 Explanation:
 
-The participant should not touch DevTools, Python, `.ini` files, or filenames. They only log into Replika, enter their participant ID, select the study start date, click export, and upload the downloaded CSV. If the participant enters `040`, the downloaded filename is `P040.csv`; if they enter `P040`, the downloaded filename is still `P040.csv`.
+The participant should not touch DevTools, Python, `.ini` files, or filenames. They only log into Replika, enter their participant ID, select the From and To dates, click export, and upload the downloaded CSV. If the participant enters `040`, the downloaded filename is `P040.csv`; if they enter `P040`, the downloaded filename is still `P040.csv`.
 
 ## Current Manual Workflow vs New Tool
 
@@ -98,7 +98,7 @@ flowchart LR
     subgraph New["New Online Participant Workflow"]
         B1["Open Replika web"] --> B2["Open LinkLab extension"]
         B2 --> B3["Enter PID"]
-        B3 --> B4["Select study start date"]
+        B3 --> B4["Select From and To dates"]
         B4 --> B5["Click Export"]
         B5 --> B6["Download P040.csv"]
     end
@@ -134,12 +134,12 @@ sequenceDiagram
     Ext->>WS: Send history request, limit = 1000
     WS-->>Ext: messages + message_reactions
 
-    Ext->>Ext: Keep messages in [study start, submit time)
+    Ext->>Ext: Keep messages in the inclusive From/To range
     Ext->>Ext: Convert included messages to CSV rows
     Ext->>WS: Send next history request with last_message_id
     WS-->>Ext: Older messages
 
-    Ext->>Ext: Stop when oldest message predates study start
+    Ext->>Ext: Stop when oldest message predates From date
     Ext->>CSV: Download P040.csv
 ```
 
@@ -168,8 +168,8 @@ Explanation:
 
 Suggested extension modules:
 
-- `export.html / export.js`: participant UI, participant ID, required study start date, and progress.
-- `studyWindow.js`: New York study-start boundary and exact submit-time filtering.
+- `export.html / export.js`: participant UI, participant ID, required From/To dates, and progress.
+- `studyWindow.js`: inclusive New York calendar-date boundaries with a submit-time cap for today.
 - `sessionBridge.js / contentScript.js`: obtains the same local v17 init/auth values currently copied from DevTools, without persisting them.
 - `v17Client.js`: mirrors the `chat_backup.py` WebSocket flow.
 - `csvWriter.js`: converts messages to the existing CSV format and downloads `P{participant_id}.csv`.
@@ -292,7 +292,7 @@ flowchart TD
     A --> D["P{participant_id}.csv filename"]
     A --> E["Exact existing columns"]
     A --> F["Progress count + simple errors"]
-    A --> M["Required study start date"]
+    A --> M["Required From and To dates"]
 
     A -. "Not V1" .-> G["Images"]
     A -. "Not V1" .-> H["Voice"]
@@ -300,7 +300,6 @@ flowchart TD
     A -. "Not V1" .-> J["Memory"]
     A -. "Not V1" .-> K["Direct upload"]
     A -. "Not V1" .-> L["Third-party proxy"]
-    A -. "Not V1" .-> N["Study end date"]
 ```
 
 Explanation:

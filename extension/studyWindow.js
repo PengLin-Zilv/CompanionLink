@@ -1,14 +1,23 @@
 export function createStudyWindow({
   startDate,
+  endDate,
   submittedAt = new Date(),
   timeZone = "America/New_York"
 }) {
-  const startMs = startOfZonedDate(startDate, timeZone);
-  const endMs = parseTimestamp(submittedAt, "submit time");
+  const start = parseDateInput(startDate, "From date");
+  const end = parseDateInput(endDate, "To date");
+  const submittedAtMs = parseTimestamp(submittedAt, "submit time");
 
-  if (startMs > endMs) {
-    throw new Error("Study start date cannot be in the future.");
+  if (start.iso > end.iso) {
+    throw new Error("From date cannot be after To date.");
   }
+  if (end.iso > zonedDateString(submittedAtMs, timeZone)) {
+    throw new Error("To date cannot be in the future.");
+  }
+
+  const startMs = startOfZonedDate(start, timeZone);
+  const selectedEndMs = startOfZonedDate(nextCalendarDate(end), timeZone);
+  const endMs = Math.min(selectedEndMs, submittedAtMs);
 
   return {
     startMs,
@@ -23,8 +32,7 @@ export function createStudyWindow({
   };
 }
 
-function startOfZonedDate(startDate, timeZone) {
-  const { year, month, day } = parseDateInput(startDate);
+function startOfZonedDate({ year, month, day }, timeZone) {
   const targetMs = utcTimestamp(year, month, day);
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -64,14 +72,14 @@ function startOfZonedDate(startDate, timeZone) {
   return candidateMs;
 }
 
-function parseDateInput(startDate) {
-  if (typeof startDate !== "string" || startDate.trim() === "") {
-    throw new Error("Study start date is required.");
+function parseDateInput(value, label) {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new Error(`${label} is required.`);
   }
 
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(startDate);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) {
-    throw new Error("Study start date must be a valid date.");
+    throw new Error(`${label} must be a valid date.`);
   }
 
   const year = Number(match[1]);
@@ -86,10 +94,38 @@ function parseDateInput(startDate) {
     date.getUTCMonth() !== month - 1 ||
     date.getUTCDate() !== day
   ) {
-    throw new Error("Study start date must be a valid date.");
+    throw new Error(`${label} must be a valid date.`);
   }
 
-  return { year, month, day };
+  return { year, month, day, iso: value };
+}
+
+function nextCalendarDate({ year, month, day }) {
+  const date = new Date(0);
+  date.setUTCFullYear(year, month - 1, day + 1);
+  date.setUTCHours(0, 0, 0, 0);
+
+  return {
+    year: date.getUTCFullYear(),
+    month: date.getUTCMonth() + 1,
+    day: date.getUTCDate()
+  };
+}
+
+function zonedDateString(timestampMs, timeZone) {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  });
+  const parts = Object.fromEntries(
+    formatter.formatToParts(new Date(timestampMs))
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value])
+  );
+
+  return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
 function parseTimestamp(timestamp, label) {

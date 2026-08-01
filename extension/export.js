@@ -5,7 +5,8 @@ import { exportHistory } from "./v17Client.js";
 
 const form = document.querySelector("#export-form");
 const participantIdInput = document.querySelector("#participant-id");
-const studyStartDateInput = document.querySelector("#study-start-date");
+const fromDateInput = document.querySelector("#from-date");
+const toDateInput = document.querySelector("#to-date");
 const exportButton = document.querySelector("#export-button");
 const statusText = document.querySelector("#status");
 const progressText = document.querySelector("#progress");
@@ -19,7 +20,8 @@ form.addEventListener("submit", async (event) => {
   try {
     filename = normalizeParticipantFilename(participantIdInput.value);
     studyWindow = createStudyWindow({
-      startDate: studyStartDateInput.value,
+      startDate: fromDateInput.value,
+      endDate: toDateInput.value,
       submittedAt
     });
   } catch (error) {
@@ -56,7 +58,8 @@ form.addEventListener("submit", async (event) => {
 function setWorking(isWorking) {
   exportButton.disabled = isWorking;
   participantIdInput.disabled = isWorking;
-  studyStartDateInput.disabled = isWorking;
+  fromDateInput.disabled = isWorking;
+  toDateInput.disabled = isWorking;
 }
 
 function showStatus(message) {
