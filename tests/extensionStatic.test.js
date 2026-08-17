@@ -8,6 +8,7 @@ test("extension manifest exposes only the MVP browser surfaces", async () => {
   const manifest = JSON.parse(await readFile("extension/manifest.json", "utf8"));
 
   assert.equal(manifest.manifest_version, 3);
+  assert.equal(manifest.name, "Companion Chat Log Export");
   assert.equal(manifest.action.default_popup, "export.html");
   assert.deepEqual(manifest.permissions, ["activeTab", "scripting"]);
   assert.ok(manifest.host_permissions.includes("https://*.replika.ai/*"));
@@ -43,14 +44,17 @@ test("extension UI and bridge files are present", async () => {
   }
 });
 
-test("extension UI asks for PID with a clear 040 example", async () => {
+test("extension UI uses participant-friendly wording", async () => {
   const html = await readFile("extension/export.html", "utf8");
 
-  assert.match(html, /<label for="participant-id">Participant ID \(PID\)<\/label>/);
+  assert.match(html, /<title>Companion Chat Log Export<\/title>/);
+  assert.match(html, /<h1>Companion Chat Log Export<\/h1>/);
+  assert.match(html, /<label for="participant-id">Participant ID<\/label>/);
   assert.match(html, /placeholder="Example: 040"/);
-  assert.match(html, /Enter the participant PID, for example 040\./);
+  assert.match(html, /Enter the participant ID, for example 040\./);
   assert.match(html, /The file will download as P040\.csv\./);
-  assert.doesNotMatch(html, /<label for="participant-id">Participant Number<\/label>/);
+  assert.match(html, />Export Chat Log<\/button>/);
+  assert.doesNotMatch(html, /\bPID\b/);
 });
 
 test("extension UI requires From and To dates and submits one study window", async () => {
@@ -61,7 +65,8 @@ test("extension UI requires From and To dates and submits one study window", asy
   assert.match(html, /<input id="from-date"[^>]*type="date"[^>]*required>/);
   assert.match(html, /<label for="to-date">To date<\/label>/);
   assert.match(html, /<input id="to-date"[^>]*type="date"[^>]*required>/);
-  assert.match(html, /Both dates are included\./);
+  assert.doesNotMatch(html, /date-range-hint/);
+  assert.doesNotMatch(html, /Both dates are included\./);
   assert.doesNotMatch(html, /study-start-date/);
   assert.match(script, /import \{ createStudyWindow \} from "\.\/studyWindow\.js";/);
   assert.equal(script.match(/new Date\(\)/g)?.length, 1);

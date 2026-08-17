@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "LinkLab Replika Exporter",
+  "name": "Companion Chat Log Export",
   "version": "0.1.0",
   "description": "Export Replika chat history to the LinkLab CSV format.",
   "action": {
