@@ -1,44 +1,46 @@
-# LinkLab Replika Exporter
+# Companion Chat Log Export
 
-Chrome extension for exporting a participant's Replika web chat into the CSV format already used by the LinkLab workflow.
+Companion Chat Log Export is a LinkLab research tool for exporting participant-authorized chat history from supported AI companion web apps into a consistent CSV format.
 
-The goal is to replace this manual process:
+The current release candidate supports Replika. It replaces a manual workflow involving browser developer tools, configuration files, Python, and file renaming with a participant-facing Chrome extension.
+
+## Current Support
+
+| Platform | Status | Exported data |
+| --- | --- | --- |
+| Replika Web | Release candidate | Text messages and reactions |
+
+Images, voice messages, diary entries, memories, analytics, and profile data are not exported.
+
+Additional AI companion platforms will be evaluated and implemented as platform-specific connectors.
+
+## Participant Workflow
 
 ```text
-Replika web
--> DevTools
--> copy v17 init message
--> paste into chat_backup.ini
--> run chat_backup.py
--> generate CSV
--> rename CSV to P###.csv
+Open Replika Web and sign in
+-> Open Companion Chat Log Export
+-> Enter the assigned Participant ID
+-> Select the From date and To date
+-> Click Export Chat Log
+-> Download P<Participant ID>.csv
 ```
 
-with this participant-facing process:
+The extension does not require the participant to open developer tools, install Python, edit configuration files, or rename the downloaded file.
 
-```text
-Replika web
--> LinkLab Replika Exporter
--> enter Participant ID (PID), for example 040
--> select From and To dates
--> download P040.csv
-```
+## Date Range
 
-## Current Status
+Both dates are required and included in the export. The current Replika connector interprets them as Eastern Time calendar dates.
 
-This is an MVP Chrome extension. It has been verified with automated tests and one live Replika export.
+- The From date begins at midnight.
+- A past To date includes the complete day.
+- If the To date is today, messages are included through the time the participant clicks **Export Chat Log**.
+- Future To dates and reversed date ranges are rejected.
 
-The extension exports text chat inside the selected inclusive From/To date range. It does not export images, voice, diary, memory, analytics, or profile data.
+The selected dates are used only during the export and are not added to the CSV.
 
-## Study Period
+## Output Format
 
-Both dates are required and interpreted as `America/New_York` calendar dates. The From date begins at midnight, and the To date includes its entire day. If the To date is today, the export includes messages only through the instant the participant clicks **Export CSV**.
-
-The dates are used only in extension memory. They are not added to the CSV or persisted after export.
-
-## CSV Contract
-
-The downloaded file is named from the entered participant ID:
+The Participant ID determines the filename:
 
 ```text
 040  -> P040.csv
@@ -46,134 +48,83 @@ P040 -> P040.csv
 p040 -> P040.csv
 ```
 
-The CSV header is exactly:
+The CSV header is:
 
 ```csv
 Timestamp,From,Text,Reaction,ID
 ```
 
-The exporter preserves the current `chat_backup.py` behavior:
+The current Replika mapping preserves the lab's existing backup format:
 
-- timestamps are converted to `America/New_York`
-- timestamps use `%Y-%m-%d %H:%M:%S`
-- `Robot` maps to `Rep`
-- non-`Robot` messages map to `Me`
-- missing reactions become `None`
-- message newlines become literal `\n`
-- rows are newest-to-oldest
+- timestamps use Eastern Time and `YYYY-MM-DD HH:MM:SS`;
+- Replika messages use `Rep` and participant messages use `Me`;
+- missing reactions use `None`;
+- message line breaks are preserved as literal `\n`;
+- rows are ordered newest to oldest.
+
+An export with no messages in the selected range produces a header-only CSV.
 
 ## Privacy Boundary
 
-The extension uses Replika session values locally in the browser to fetch the participant's own chat history.
+The extension uses the participant's active Replika web session locally in Chrome to request their chat history.
 
 The extension does not:
 
-- ask for a Replika password
-- upload directly to LinkLab
-- use a third-party proxy
-- persist Replika auth/session values
-- write auth tokens, device IDs, user IDs, chat IDs, email, or profile data to the CSV
+- ask for or store a Replika password;
+- persist Replika authentication or session values;
+- write authentication tokens, device IDs, account IDs, chat IDs, email addresses, or profile data to the CSV;
+- transmit the exported chat log to LinkLab or another server.
 
-For v1, the only output is a local CSV download.
+The only output is a CSV downloaded to the participant's computer.
 
-## Load The Extension
+## Release Status
 
-1. Open Chrome.
-2. Go to:
+Version `0.1.0` is a pre-release Replika build. Participant distribution is planned through an unlisted Chrome Web Store listing after release validation and policy review.
 
-```text
-chrome://extensions
-```
+For local development and testing:
 
-3. Turn on **Developer mode**.
-4. Click **Load unpacked**.
-5. Select the extension folder:
+1. Open `chrome://extensions` in Chrome.
+2. Turn on **Developer mode**.
+3. Click **Load unpacked**.
+4. Select the repository's `extension` folder.
+5. Refresh any open Replika tab before testing.
 
-```text
-linklab-replika-exporter/extension
-```
+This unpacked installation flow is for development, not the planned participant workflow.
 
-6. Pin **LinkLab Replika Exporter** if you want it visible in the toolbar.
+## Documentation
 
-## Export A Chat
+- [Researcher Guide](docs/researcher-guide.md)
+- [Participant Instructions](docs/participant-guide.md)
+- [Replika MVP Specification](docs/replika-exporter-mvp-spec.md)
+- [Date Range Specification](docs/study-start-date-filter-spec.md)
 
-1. Open Replika web in Chrome and log in.
-2. Refresh the Replika tab once after loading or reloading the extension.
-3. Wait for the Replika chat page to finish loading.
-4. Click the **LinkLab Replika Exporter** extension icon.
-5. Enter the Participant ID (PID), for example:
-
-```text
-040
-```
-
-6. Select the From and To dates provided by the research team.
-7. Click **Export CSV**.
-8. Confirm the browser downloaded:
-
-```text
-P040.csv
-```
-
-## Troubleshooting
-
-### "Open Replika in the active tab before exporting."
-
-Make sure the currently active Chrome tab is a Replika web tab, such as `https://my.replika.com/...`.
-
-### "Replika session was not captured."
-
-Refresh the Replika tab, wait for chat to fully load, then try exporting again. The extension captures the same v17 init/session information that the old workflow copied from DevTools.
-
-### No file downloads
-
-Check whether Chrome blocked downloads or whether another download prompt is waiting. Then reload the extension from `chrome://extensions` and refresh Replika.
+The participant instructions reflect the planned Chrome Web Store distribution flow and should be updated if the release process changes.
 
 ## Development
 
-This project uses plain JavaScript and Chrome Manifest V3. There are no runtime npm dependencies.
+The extension uses plain JavaScript, HTML, CSS, and Chrome Manifest V3. It has no runtime package dependencies.
 
-Run the automated tests:
+Run the automated test suite:
 
 ```powershell
 npm.cmd test
 ```
 
-On shells where `npm` is not blocked by PowerShell execution policy, this also works:
+The tests cover:
 
-```bash
-npm test
-```
+- Participant ID filename normalization;
+- CSV mapping and escaping;
+- Eastern Time date boundaries;
+- Replika v17 event sequencing and history pagination;
+- study-window filtering;
+- extension files, permissions, and participant-facing copy.
 
-## Project Layout
+A complete release check also requires a manual export from an authenticated Replika web account.
 
-```text
-extension/
-  manifest.json       Chrome extension manifest
-  export.html         Popup UI
-  export.js           Popup workflow and CSV download
-  sessionBridge.js    Active-tab session lookup
-  contentScript.js    Replika tab bridge
-  pageBridge.js       Page-context v17 init capture
-  v17Client.js        Replika v17 WebSocket flow
-  studyWindow.js      Inclusive From/To date filtering
-  csvWriter.js        CSV mapping and filename normalization
-
-tests/
-  csvWriter.test.js
-  extensionStatic.test.js
-  studyWindow.test.js
-  v17Client.test.js
-
-docs/
-  replika-exporter-mvp-spec.md
-  study-start-date-filter-spec.md
-```
-
-## Reference
-
-The behavioral source of truth for v1 is the existing lab script:
+## Project Structure
 
 ```text
-C:\Users\linpe\SyracuseUniversity\LinkLab\Replika_Chatlog\replika_backup-main\chat_backup.py
+extension/   Chrome extension source
+tests/       Automated tests
+docs/        Researcher, participant, and behavior documentation
 ```
