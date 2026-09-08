@@ -11,7 +11,7 @@ Prepare these four items:
 - the From date and To date;
 - the study's file-submission instructions.
 
-Both dates are included and currently use Eastern Time. If the To date is today, the export includes messages through the time the participant clicks **Export Chat Log**.
+Both dates are included and use the participant's computer time zone, detected when they click **Export Chat Log**. Provide dates intended for that time zone. If the To date is today, the export includes messages through the time they click the button.
 
 ## Install And Verify
 
@@ -48,6 +48,22 @@ A successful export shows:
 - the CSV file in Chrome's Downloads folder.
 
 Open the file and confirm that it contains the expected date range. A file with zero messages may be valid, but first confirm the participant used the correct account and dates.
+
+## Time Columns
+
+- `Timestamp_Local`: message time in the detected computer time zone.
+- `Local_Timezone`: the detected zone, such as `America/Los_Angeles`.
+- `Timestamp_UTC`: the precise time reference for matching study prompts and calculating elapsed time.
+- `Timestamp_Eastern`: the corresponding Eastern Time for the team's reference.
+
+The remaining columns are `From,Text,Reaction,ID`. Rows are newest first.
+Update analysis scripts that expect the old five-column CSV: `Timestamp_Eastern`
+replaces the former `Timestamp` column. The legacy Python script has not changed.
+
+All local timestamps use the time zone detected at export, with daylight-saving
+rules applied at each message's date. They do not establish where the participant
+was at the time. Agree on how the study handles travel or changed time-zone settings.
+Use UTC to distinguish repeated clock times when daylight saving time ends.
 
 ## Troubleshooting
 

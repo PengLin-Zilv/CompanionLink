@@ -2,7 +2,7 @@ export function createStudyWindow({
   startDate,
   endDate,
   submittedAt = new Date(),
-  timeZone = "America/New_York"
+  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
 }) {
   const start = parseDateInput(startDate, "From date");
   const end = parseDateInput(endDate, "To date");
@@ -20,6 +20,7 @@ export function createStudyWindow({
   const endMs = Math.min(selectedEndMs, submittedAtMs);
 
   return {
+    timeZone,
     startMs,
     endMs,
     includes(timestamp) {

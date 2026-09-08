@@ -1,19 +1,13 @@
 # Study Date Range Filter Spec
 
-This spec supersedes the original start-date-to-submit-time behavior.
-
-The approved design is:
-
-```text
-docs/superpowers/specs/2026-07-29-study-date-range-design.md
-```
+This spec supersedes the original start-date-to-submit-time behavior and the fixed Eastern-Time date window.
 
 ## Required Behavior
 
 The extension popup requires:
 
 ```text
-Participant ID (PID)
+Participant ID
 From date
 To date
 ```
@@ -26,7 +20,10 @@ Both date controls use:
 
 ## Date Semantics
 
-Both dates are `America/New_York` calendar dates.
+Both dates are calendar dates in the computer's time zone, detected with
+`Intl.DateTimeFormat().resolvedOptions().timeZone` when the form is submitted.
+Capture it once and keep it with the study window for filtering and CSV conversion.
+No time-zone selector is required. "Today" is determined in this same time zone.
 
 The effective export interval is:
 
@@ -37,7 +34,7 @@ from_midnight <= message_timestamp < effective_end
 where:
 
 ```text
-selected_end = New York midnight immediately after To date
+selected_end = local midnight immediately after To date
 effective_end = min(selected_end, submit_time)
 ```
 
@@ -59,13 +56,19 @@ The filename remains:
 P{participant_id}.csv
 ```
 
-The CSV header remains:
+The CSV header is:
 
 ```csv
-Timestamp,From,Text,Reaction,ID
+Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID
 ```
 
-The date range does not add columns or metadata. A range with no messages
+Local and Eastern timestamps use `YYYY-MM-DD HH:mm:ss`. UTC uses
+`YYYY-MM-DDTHH:mm:ss.sssZ`, preserving milliseconds. Eastern means
+`America/New_York`. Local_Timezone records the captured computer zone.
+Use each message's date to apply daylight-saving rules, not today's UTC offset.
+The export does not infer historical location or track travel.
+
+The selected dates are not added to the CSV. A range with no messages
 downloads a header-only CSV and reports:
 
 ```text
@@ -77,7 +80,7 @@ downloads a header-only CSV and reports:
 `extension/studyWindow.js` owns:
 
 - From/To validation
-- New York calendar-date conversion
+- detected local time zone and calendar-date conversion
 - inclusive To-date conversion to the following midnight
 - submit-time capping when To date is today
 - timestamp inclusion and pagination-stop predicates
@@ -85,8 +88,9 @@ downloads a header-only CSV and reports:
 `extension/export.js` captures submit time once and passes both dates to the
 study-window helper.
 
-`extension/v17Client.js` remains unchanged. It consumes the existing
-`includes(timestamp)` and `isOlderThanStart(timestamp)` predicates.
+`extension/v17Client.js` consumes the `includes(timestamp)` and
+`isOlderThanStart(timestamp)` predicates and passes the captured time zone to
+`csvWriter.js` for every batch.
 
 ## Privacy Boundary
 
@@ -104,16 +108,19 @@ Do not:
 - time-of-day controls
 - future To dates
 - multiple date ranges
-- timezone selection
+- manual timezone selection or historical location tracking
 - direct upload
-- extra CSV columns
+- columns beyond the eight-column contract above
 
 ## Acceptance Checklist
 
 - Both dates are required.
-- Both dates are inclusive New York calendar dates.
+- Both dates are inclusive calendar dates in the detected computer time zone.
 - To date of today is capped at submit time.
 - Invalid, reversed, and future ranges are rejected.
 - All exported messages fall inside the effective range.
-- CSV schema, filename, mapping, and row order remain unchanged.
+- CSV uses the agreed eight columns; filename, non-time mapping, and row order remain unchanged.
 - Empty ranges produce a header-only CSV.
+- Changing the computer time zone during export does not change that export's time zone.
+- Test both sides of midnight, fractional-offset zones, and 23/25-hour daylight-saving days.
+- UTC distinguishes messages with repeated local clock times.

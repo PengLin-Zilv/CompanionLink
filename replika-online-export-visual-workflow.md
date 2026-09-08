@@ -1,5 +1,10 @@
 # Replika Online Export Tool: Visual Workflow And Architecture
 
+> Historical MVP design. The fixed Eastern-Time window and five-column CSV below
+> are superseded by [the current date and timezone specification](docs/study-start-date-filter-spec.md)
+> and [current output format](README.md#output-format). Retained as the original
+> manual-workflow and architecture reference.
+
 ## Goal
 
 Replace the current manual lab workflow:

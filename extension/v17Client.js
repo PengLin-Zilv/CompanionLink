@@ -20,6 +20,7 @@ export function exportHistory({
   const init = JSON.parse(initMessage);
   const auth = init.auth;
   const resolvedChatId = chatId || deriveChatId(auth.user_id);
+  const timeZone = studyWindow?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
   const rows = [];
 
   return new Promise((resolve, reject) => {
@@ -78,7 +79,7 @@ export function exportHistory({
               ...serverEvent.payload,
               messages: includedMessages
             }
-          }));
+          }, timeZone));
           onProgress(rows.length);
 
           if (studyWindow?.isOlderThanStart(messages[0].meta.timestamp)) {

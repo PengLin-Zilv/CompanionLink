@@ -29,14 +29,14 @@ The extension does not require the participant to open developer tools, install 
 
 ## Date Range
 
-Both dates are required and included in the export. The current Replika connector interprets them as Eastern Time calendar dates.
+Both dates are required and included in the export. The extension automatically uses the computer's time zone when **Export Chat Log** is clicked. No manual time-zone selection is needed.
 
 - The From date begins at midnight.
 - A past To date includes the complete day.
 - If the To date is today, messages are included through the time the participant clicks **Export Chat Log**.
 - Future To dates and reversed date ranges are rejected.
 
-The selected dates are used only during the export and are not added to the CSV.
+The selected dates are used only during the export and are not added to the CSV. The same detected time zone is used for date filtering and local timestamps throughout the export.
 
 ## Output Format
 
@@ -51,18 +51,30 @@ p040 -> P040.csv
 The CSV header is:
 
 ```csv
-Timestamp,From,Text,Reaction,ID
+Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID
 ```
 
-The current Replika mapping preserves the lab's existing backup format:
+| Column | Meaning |
+| --- | --- |
+| `Timestamp_Local` | Message time in the computer's detected time zone, `YYYY-MM-DD HH:mm:ss` |
+| `Local_Timezone` | Detected time-zone name, such as `America/Los_Angeles` |
+| `Timestamp_UTC` | Message instant in UTC, `YYYY-MM-DDTHH:mm:ss.sssZ` |
+| `Timestamp_Eastern` | Message time in `America/New_York`, `YYYY-MM-DD HH:mm:ss` |
 
-- timestamps use Eastern Time and `YYYY-MM-DD HH:MM:SS`;
+UTC is the reference for matching messages to study prompts and calculating elapsed time. Local and Eastern timestamps apply the time-zone rules at each message's date, including daylight saving time. Repeated local clock times remain distinguishable by UTC.
+
+The detected time zone reflects the computer setting at export, not the participant's historical location. Travel or changed settings cannot be reconstructed from message timestamps alone.
+
+The remaining Replika mapping preserves the existing backup behavior:
+
 - Replika messages use `Rep` and participant messages use `Me`;
 - missing reactions use `None`;
 - message line breaks are preserved as literal `\n`;
 - rows are ordered newest to oldest.
 
 An export with no messages in the selected range produces a header-only CSV.
+
+This eight-column format replaces the previous five-column CSV. Analysis scripts must use the new headers: the former Eastern `Timestamp` is now `Timestamp_Eastern`. The legacy Python backup script still produces the old format.
 
 ## Privacy Boundary
 
@@ -114,10 +126,12 @@ The tests cover:
 
 - Participant ID filename normalization;
 - CSV mapping and escaping;
-- Eastern Time date boundaries;
+- local date boundaries, fractional UTC offsets, and daylight-saving changes;
+- UTC, local, and Eastern timestamp conversion;
 - Replika v17 event sequencing and history pagination;
 - study-window filtering;
-- extension files, permissions, and participant-facing copy.
+- extension files, permissions, and participant-facing copy;
+- popup submission through CSV download with simulated browser/network boundaries in multiple time zones.
 
 A complete release check also requires a manual export from an authenticated Replika web account.
 

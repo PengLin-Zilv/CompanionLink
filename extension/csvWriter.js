@@ -1,15 +1,9 @@
-const CSV_COLUMNS = ["Timestamp", "From", "Text", "Reaction", "ID"];
+const CSV_COLUMNS = [
+  "Timestamp_Local", "Local_Timezone", "Timestamp_UTC", "Timestamp_Eastern",
+  "From", "Text", "Reaction", "ID"
+];
 
-const nyFormatter = new Intl.DateTimeFormat("en-US", {
-  timeZone: "America/New_York",
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hourCycle: "h23"
-});
+const easternFormatter = createTimestampFormatter("America/New_York");
 
 export function normalizeParticipantFilename(participantId) {
   const raw = String(participantId ?? "").trim();
@@ -23,16 +17,24 @@ export function normalizeParticipantFilename(participantId) {
   return `P${core}.csv`;
 }
 
-export function messagesToRows(historyEvent) {
+export function messagesToRows(historyEvent, timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone) {
   const payload = historyEvent?.payload ?? {};
   const messages = Array.isArray(payload.messages) ? payload.messages : [];
   const reactions = reactionsByMessageId(payload.message_reactions);
   const rows = [];
+  const localFormatter = createTimestampFormatter(timeZone);
 
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     const message = messages[index];
+    const date = new Date(message.meta.timestamp);
+    if (Number.isNaN(date.getTime())) {
+      throw new Error(`Invalid message timestamp: ${message.meta.timestamp}`);
+    }
     rows.push({
-      Timestamp: formatNewYorkTimestamp(message.meta.timestamp),
+      Timestamp_Local: formatTimestamp(date, localFormatter),
+      Local_Timezone: timeZone,
+      Timestamp_UTC: date.toISOString(),
+      Timestamp_Eastern: formatTimestamp(date, easternFormatter),
       From: message.meta.nature === "Robot" ? "Rep" : "Me",
       Text: String(message.content?.text ?? "").replaceAll("\n", "\\n"),
       Reaction: reactions.get(message.id) ?? "None",
@@ -52,14 +54,22 @@ export function buildCsv(rows) {
   return `${lines.join("\r\n")}\r\n`;
 }
 
-export function formatNewYorkTimestamp(timestamp) {
-  const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) {
-    throw new Error(`Invalid message timestamp: ${timestamp}`);
-  }
+function createTimestampFormatter(timeZone) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+  });
+}
 
+function formatTimestamp(date, formatter) {
   const parts = Object.fromEntries(
-    nyFormatter.formatToParts(date)
+    formatter.formatToParts(date)
       .filter((part) => part.type !== "literal")
       .map((part) => [part.type, part.value])
   );

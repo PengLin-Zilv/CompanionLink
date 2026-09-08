@@ -32,7 +32,7 @@ Have these items ready:
 8. Wait until the extension displays `Downloaded P<Participant ID>.csv`.
 9. Confirm that the file is in Chrome's Downloads folder.
 
-Both selected dates are included and use Eastern Time. If the To date is today, the export includes messages through the time you click **Export Chat Log**.
+Both selected dates are included and use your computer's time zone automatically. Check that your computer's time zone is correct before exporting. If the To date is today, the export includes messages through the time you click **Export Chat Log**.
 
 ## Submit The File
 

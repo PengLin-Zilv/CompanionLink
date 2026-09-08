@@ -4,7 +4,7 @@
 
 ### 1. Problem Essence
 
-**Core problem:** Online participants need to produce the same CSV the lab already accepts, without DevTools, `.ini` editing, Python, or manual renaming.
+**Core problem:** Online participants need to export their selected local-date chat history into a consistent lab CSV, without DevTools, `.ini` editing, Python, or manual renaming.
 
 **Success criteria:**
 
@@ -13,9 +13,9 @@
 - Participant enters an ID such as `040`.
 - Participant selects required From and To dates.
 - Extension downloads `P040.csv`.
-- CSV includes only messages inside the inclusive New York calendar-date range.
-- CSV header is exactly `Timestamp,From,Text,Reaction,ID`.
-- CSV rows preserve the current `chat_backup.py` semantics.
+- CSV includes only messages inside the inclusive date range in the participant computer's time zone.
+- CSV header is exactly `Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID`.
+- CSV rows preserve the `chat_backup.py` non-time mapping and newest-first order.
 - Replika auth token, device ID, user ID, chat ID, email, password, and profile data are not written to CSV or sent to LinkLab.
 
 ### 2. Assumptions Challenged
@@ -25,12 +25,12 @@
 | The extension only needs localStorage access | The current manual workflow copies a v17 init message from DevTools; that value may be in runtime WebSocket traffic, not just storage. | Modify: capture or read the v17 init locally. |
 | `PID.csv` is a literal filename | The participant ID is the variable. `040` should produce `P040.csv`. | Modify: normalize participant ID to `P{id}.csv`. |
 | Direct upload is part of MVP | Local CSV download already solves the participant-hostile workflow and has a smaller privacy surface. | Discard for v1. |
-| The extension can improve CSV shape | The downstream lab pipeline expects the existing contract. | Discard. |
+| The CSV must keep only Eastern Time | Cross-time-zone studies need local context and precise event matching. | Replace the single timestamp with local time, zone, UTC, and Eastern time; update downstream consumers. |
 
 ### 3. Ground Truths
 
-- `chat_backup.py` is the behavioral source of truth for v1.
-- The lab CSV contract has exactly five columns: `Timestamp,From,Text,Reaction,ID`.
+- `chat_backup.py` is the reference for Replika retrieval and non-time CSV mapping.
+- The current CSV contract has eight columns: `Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID`.
 - `chat_backup.py` uses Replika v17 WebSocket at `wss://ws.replika.ai/v17`.
 - `chat_backup.py` sends `init`, `chat_screen`, `application_started`, `app_foreground`, then paged `history` requests.
 - The current output order is newest-to-oldest.
@@ -50,9 +50,12 @@
 
 ```text
 meta.timestamp
-  -> Timestamp
-  -> convert UTC to America/New_York
-  -> format "%Y-%m-%d %H:%M:%S"
+  -> Timestamp_UTC: normalized UTC ISO string with milliseconds and Z
+  -> Timestamp_Local: captured computer zone, YYYY-MM-DD HH:mm:ss
+  -> Timestamp_Eastern: America/New_York, YYYY-MM-DD HH:mm:ss
+
+captured computer time zone
+  -> Local_Timezone
 
 meta.nature == "Robot"
   -> From = "Rep"
@@ -77,7 +80,8 @@ message.id
 #### Study Window
 
 - From and To dates are required.
-- Interpret both as `America/New_York` calendar dates.
+- Interpret both as calendar dates in the computer time zone detected at submission.
+- Keep this same time zone for all batches and CSV local timestamps.
 - Begin at midnight on the From date.
 - Represent the inclusive To date with an exclusive boundary at the following midnight.
 - Capture submit time exactly once when the participant submits the popup form.
@@ -121,8 +125,8 @@ extension/contentScript.js
   -> Replika page WebSocket traffic / storage
 ```
 
-- `csvWriter.js` owns CSV conversion, New York timestamp formatting, CSV escaping, and filename normalization.
-- `studyWindow.js` owns the New York study-start boundary and exact submit-time comparison.
+- `csvWriter.js` owns CSV conversion, local/UTC/Eastern timestamp formatting, CSV escaping, and filename normalization.
+- `studyWindow.js` captures the computer time zone and owns local date boundaries and exact submit-time comparison.
 - `v17Client.js` owns WebSocket sequencing and history pagination.
 - `pageBridge.js` runs in the Replika page context and captures the raw v17 init message when available.
 - `contentScript.js` keeps the latest init message in memory and responds to extension requests.
@@ -134,7 +138,8 @@ extension/contentScript.js
 - Unit tests verify filename normalization.
 - Unit tests verify CSV header, row order, timestamp conversion, sender mapping, reaction fallback, newline escaping, and CSV quoting.
 - Unit tests verify v17 event sequencing and `last_message_id` pagination using a fake WebSocket.
-- Unit tests verify New York date boundaries, future-date rejection, message filtering, and pagination stopping.
+- Unit tests verify date boundaries across time zones and daylight-saving transitions, future-date rejection, message filtering, and pagination stopping.
+- Popup integration tests use simulated browser/network boundaries to verify local-date filtering and downloaded CSV contents across batches.
 - Static tests verify required extension files and manifest permissions.
 - Live Replika export is a manual verification step because it requires an authenticated participant browser session.
 
@@ -146,5 +151,6 @@ extension/contentScript.js
 - Account linking.
 - Third-party proxy services.
 - Persistent Replika auth/session storage.
-- Alternate CSV schemas or extra columns.
+- Alternate CSV schemas or columns beyond the eight-column contract.
+- Historical location or travel tracking; local conversion uses the computer zone detected at export.
 - Multiple study windows or a timezone selector.
