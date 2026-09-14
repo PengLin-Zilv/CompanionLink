@@ -39,38 +39,31 @@ function startOfZonedDate({ year, month, day }, timeZone) {
     timeZone,
     year: "numeric",
     month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23"
+    day: "2-digit"
   });
 
-  let candidateMs = targetMs;
+  const dayMs = 24 * 60 * 60 * 1000;
+  let lowerMs = targetMs - dayMs;
+  let upperMs = targetMs + dayMs;
 
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  // Find the first instant of the local date, even when midnight is skipped.
+  while (lowerMs < upperMs) {
+    const candidateMs = Math.floor((lowerMs + upperMs) / 2);
     const parts = Object.fromEntries(
       formatter.formatToParts(new Date(candidateMs))
         .filter((part) => part.type !== "literal")
         .map((part) => [part.type, Number(part.value)])
     );
-    const observedMs = utcTimestamp(
-      parts.year,
-      parts.month,
-      parts.day,
-      parts.hour,
-      parts.minute,
-      parts.second
-    );
-    const adjustmentMs = targetMs - observedMs;
+    const observedDateMs = utcTimestamp(parts.year, parts.month, parts.day);
 
-    candidateMs += adjustmentMs;
-    if (adjustmentMs === 0) {
-      break;
+    if (observedDateMs < targetMs) {
+      lowerMs = candidateMs + 1;
+    } else {
+      upperMs = candidateMs;
     }
   }
 
-  return candidateMs;
+  return lowerMs;
 }
 
 function parseDateInput(value, label) {
@@ -139,9 +132,9 @@ function parseTimestamp(timestamp, label) {
   return timestampMs;
 }
 
-function utcTimestamp(year, month, day, hour = 0, minute = 0, second = 0) {
+function utcTimestamp(year, month, day) {
   const date = new Date(0);
   date.setUTCFullYear(year, month - 1, day);
-  date.setUTCHours(hour, minute, second, 0);
+  date.setUTCHours(0, 0, 0, 0);
   return date.getTime();
 }

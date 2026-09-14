@@ -167,3 +167,48 @@ test("determines today and future dates in the selected timezone", () => {
   assert.equal(window.startMs, Date.parse("2026-09-07T16:00:00Z"));
   assert.equal(window.endMs, Date.parse(submittedAt));
 });
+
+// Regression: midnight is skipped on these dates (23:59:59 -> 01:00:00).
+// The old three-adjustment conversion returned 23:00 on the previous day.
+for (const [timeZone, previousDate, transitionDate, previousStart, boundary, nextStart] of [
+  ["Africa/Cairo", "2026-04-23", "2026-04-24",
+    "2026-04-22T22:00:00Z", "2026-04-23T22:00:00Z", "2026-04-24T21:00:00Z"],
+  ["Asia/Beirut", "2026-03-28", "2026-03-29",
+    "2026-03-27T22:00:00Z", "2026-03-28T22:00:00Z", "2026-03-29T21:00:00Z"]
+]) {
+  test(`${timeZone}: From date with skipped midnight excludes the previous evening`, () => {
+    const window = createStudyWindow({
+      startDate: transitionDate,
+      endDate: transitionDate,
+      timeZone,
+      submittedAt: "2027-01-01T00:00:00Z"
+    });
+    const boundaryMs = Date.parse(boundary);
+
+    assert.equal(window.includes(boundaryMs - 30 * 60 * 1000), false);
+    assert.equal(window.startMs, boundaryMs);
+    assert.equal(window.includes(boundaryMs - 1), false);
+    assert.equal(window.isOlderThanStart(boundaryMs - 1), true);
+    assert.equal(window.includes(boundaryMs), true);
+    assert.equal(window.isOlderThanStart(boundaryMs), false);
+    assert.equal(window.endMs, Date.parse(nextStart));
+    assert.equal(window.includes(Date.parse(nextStart) - 1), true);
+    assert.equal(window.includes(nextStart), false);
+  });
+
+  test(`${timeZone}: To date before skipped midnight keeps its final hour`, () => {
+    const window = createStudyWindow({
+      startDate: previousDate,
+      endDate: previousDate,
+      timeZone,
+      submittedAt: "2027-01-01T00:00:00Z"
+    });
+    const boundaryMs = Date.parse(boundary);
+
+    assert.equal(window.includes(boundaryMs - 30 * 60 * 1000), true);
+    assert.equal(window.startMs, Date.parse(previousStart));
+    assert.equal(window.endMs, boundaryMs);
+    assert.equal(window.includes(boundaryMs - 1), true);
+    assert.equal(window.includes(boundaryMs), false);
+  });
+}
