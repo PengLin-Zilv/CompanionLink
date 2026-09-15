@@ -1,6 +1,6 @@
 # Companion Chat Log Export
 
-Companion Chat Log Export is a LinkLab research tool for exporting participant-authorized chat history from supported AI companion web apps into a consistent CSV format.
+Companion Chat Log Export is a LinkLab HCI research tool at Syracuse University for exporting participant-authorized chat history from supported AI companion web apps into a consistent CSV format.
 
 The current release candidate supports Replika. It replaces a manual workflow involving browser developer tools, configuration files, Python, and file renaming with a participant-facing Chrome extension.
 
@@ -31,7 +31,7 @@ The extension does not require the participant to open developer tools, install 
 
 Both dates are required and included in the export. The extension automatically uses the computer's time zone when **Export Chat Log** is clicked. No manual time-zone selection is needed.
 
-- The From date begins at midnight.
+- The From date begins at its first local instant, normally midnight (or later if daylight saving time skips midnight).
 - A past To date includes the complete day.
 - If the To date is today, messages are included through the time the participant clicks **Export Chat Log**.
 - Future To dates and reversed date ranges are rejected.
@@ -105,12 +105,13 @@ This unpacked installation flow is for development, not the planned participant 
 
 ## Documentation
 
-- [Researcher Guide](docs/researcher-guide.md)
-- [Participant Instructions](docs/participant-guide.md)
-- [Replika MVP Specification](docs/replika-exporter-mvp-spec.md)
-- [Date Range Specification](docs/study-start-date-filter-spec.md)
+Replika:
 
-The participant instructions reflect the planned Chrome Web Store distribution flow and should be updated if the release process changes.
+- [Participant Instructions](docs/replika/participant-guide.md)
+- [Researcher Guide](docs/replika/researcher-guide.md)
+- [Visual Workflow and Automation](docs/replika/replika-visual-workflow.md)
+
+The user guides are drafts for the planned Chrome Web Store release. For current local testing, follow the unpacked installation steps above.
 
 ## Development
 
@@ -138,7 +139,7 @@ A complete release check also requires a manual export from an authenticated Rep
 ## Project Structure
 
 ```text
-extension/   Chrome extension source
-tests/       Automated tests
-docs/        Researcher, participant, and behavior documentation
+extension/     Chrome extension source
+tests/         Automated tests
+docs/replika/  Replika guides and visual workflow
 ```
