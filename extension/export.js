@@ -68,6 +68,7 @@ function showStatus(message) {
 }
 
 function showError(message) {
+  progressText.textContent = "";
   statusText.dataset.tone = "error";
   statusText.textContent = message;
 }

@@ -2,6 +2,38 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 
+for (const scenario of ["close", "malformed"]) {
+  test(`popup ${scenario} failure shows an error, downloads nothing, and enables retry`, () => {
+    const child = spawnSync(process.execPath, ["tests/fixtures/popupExport.mjs", scenario], {
+      encoding: "utf8", env: { ...process.env, TZ: "America/Los_Angeles" }, timeout: 10000
+    });
+    assert.equal(child.status, 0, child.stderr || child.error?.message);
+    const result = JSON.parse(child.stdout);
+    assert.equal(result.csv, null);
+    assert.equal(result.filename, undefined);
+    assert.equal(result.tone, "error");
+    assert.match(result.status, /try again/i);
+    assert.equal(result.progress, "");
+    assert.deepEqual(result.disabled, [false, false, false, false]);
+  });
+}
+
+test("popup repeat-only page finishes with exactly the two original messages", () => {
+  const child = spawnSync(process.execPath, ["tests/fixtures/popupExport.mjs", "repeat"], {
+    encoding: "utf8", env: { ...process.env, TZ: "America/Los_Angeles" }, timeout: 10000
+  });
+  assert.equal(child.status, 0, child.stderr || child.error?.message);
+  const result = JSON.parse(child.stdout);
+  assert.equal(result.filename, "P040.csv");
+  assert.equal(result.tone, "info");
+  assert.equal(result.status, "Downloaded P040.csv");
+  assert.equal(result.progress, "2 messages exported");
+  assert.deepEqual(result.disabled, [false, false, false, false]);
+  const rows = result.csv.trimEnd().split("\r\n").slice(1).map((line) => line.split(","));
+  assert.deepEqual(rows.map((row) => row.at(-1)), ["late", "midday"]);
+  assert.ok(rows.every((row) => row[1] === "America/Los_Angeles"));
+});
+
 for (const [timeZone, ids, firstRow] of [
   ["America/Los_Angeles", ["late", "midday", "boundary"],
     "2026-09-07 16:59:00,America/Los_Angeles,2026-09-07T23:59:00.000Z,2026-09-07 19:59:00,Me,Example,None,late"],

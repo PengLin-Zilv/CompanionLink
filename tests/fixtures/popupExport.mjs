@@ -50,11 +50,26 @@ const batches = [
     message("boundary", "2026-09-07T07:00:00Z")]
 ];
 globalThis.WebSocket = class {
-  constructor() { queueMicrotask(() => this.onopen()); }
+  constructor() { this.historyRequests = 0; queueMicrotask(() => this.onopen()); }
   send(raw) {
     const request = JSON.parse(raw);
     let payload = {};
     if (request.event_name === "history") {
+      this.historyRequests++;
+      if (this.historyRequests === 2 && process.argv[2]) {
+        const scenario = process.argv[2];
+        if (scenario === "close") {
+          queueMicrotask(() => this.onclose?.());
+          return;
+        }
+        payload = scenario === "repeat"
+          ? { messages: [message("midday", "2026-09-07T12:00:00Z")] }
+          : {};
+        queueMicrotask(() => this.onmessage({ data: JSON.stringify({
+          event_name: "history", token: "fixture", payload
+        }) }));
+        return;
+      }
       // A setting change mid-export must not mix zones between batches.
       process.env.TZ = "America/New_York";
       payload = { messages: batches.shift() ?? [], message_reactions: [] };
@@ -71,5 +86,8 @@ await submit({ preventDefault() {} });
 console.log(JSON.stringify({
   filename, csv: downloadedBlob ? await downloadedBlob.text() : null,
   status: elements.get("#status").textContent,
+  tone: elements.get("#status").dataset.tone,
+  disabled: ["#participant-id", "#from-date", "#to-date", "#export-button"]
+    .map((selector) => elements.get(selector).disabled),
   progress: elements.get("#progress").textContent
 }));

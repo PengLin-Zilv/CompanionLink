@@ -76,6 +76,19 @@ An export with no messages in the selected range produces a header-only CSV.
 
 This eight-column format replaces the previous five-column CSV. Analysis scripts must use the new headers: the former Eastern `Timestamp` is now `Timestamp_Eastern`. The legacy Python backup script still produces the old format.
 
+## Export Failures
+
+The exporter stops with an error if the connection closes unexpectedly, a
+connection or export-response wait reaches 30 seconds, or history responses are
+malformed. Repeated message IDs are skipped; an empty page or a page containing
+no new IDs ends the export. The timeout applies
+to each wait, not the total export duration. Unrelated server events do not
+extend it. Non-JSON frames are ignored without resetting the timeout.
+
+Failed exports do not download a partial CSV. The form becomes available again
+so the user can retry from the beginning; automatic retry and resume are not
+implemented. Keep the popup open until the export completes.
+
 ## Privacy Boundary
 
 The extension uses the participant's active Replika web session locally in Chrome to request their chat history.
