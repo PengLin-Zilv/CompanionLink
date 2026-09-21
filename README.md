@@ -103,6 +103,31 @@ For local development and testing:
 
 This unpacked installation flow is for development, not the planned participant workflow.
 
+## Versioning
+
+`extension/manifest.json` holds the version Chrome and the Chrome Web Store read; `package.json` mirrors it. Change both together — a test asserts they match.
+
+Chrome accepts one to four dot-separated integers between 0 and 65535, without leading zeros. Semantic-versioning pre-release suffixes such as `0.2.0-rc1` are invalid in a manifest; use the optional `version_name` field for a display label instead.
+
+The Web Store rejects an upload whose version is not higher than the published one, and a version cannot be reused or rolled back. Every re-upload needs a new version, including a one-line fix.
+
+While the major version is `0`, the CSV schema is not frozen, and a breaking change raises the minor version rather than the major version.
+
+| Version | Meaning |
+| --- | --- |
+| `0.1.0` | First unlisted Chrome Web Store upload |
+| `0.1.x` | Fixes after an upload, however small |
+| `0.2.0` | New features that keep the current CSV schema |
+| `0.3.0` | Kindroid connector or a CSV column change |
+| `1.0.0` | CSV schema frozen for a running study |
+
+Tag every uploaded build so the published package maps to a commit:
+
+```powershell
+git tag -a v0.1.0 -m "First Chrome Web Store upload"
+git push --tags
+```
+
 ## Documentation
 
 Replika:

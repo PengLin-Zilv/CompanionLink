@@ -18,6 +18,26 @@ test("extension manifest exposes only the MVP browser surfaces", async () => {
   assert.equal(manifest.content_scripts[0].js[0], "contentScript.js");
 });
 
+test("manifest and package versions match and are valid for Chrome", async () => {
+  const manifest = JSON.parse(await readFile("extension/manifest.json", "utf8"));
+  const pkg = JSON.parse(await readFile("package.json", "utf8"));
+
+  assert.equal(
+    manifest.version,
+    pkg.version,
+    "extension/manifest.json and package.json must declare the same version"
+  );
+
+  const parts = manifest.version.split(".");
+  assert.ok(parts.length >= 1 && parts.length <= 4, "version needs one to four parts");
+  assert.ok(parts.some((part) => part !== "0"), "version must not be all zero");
+
+  for (const part of parts) {
+    assert.match(part, /^(0|[1-9][0-9]*)$/, `"${part}" must be an integer without leading zeros`);
+    assert.ok(Number(part) <= 65535, `"${part}" must not exceed 65535`);
+  }
+});
+
 test("session bridge accepts live Replika web tab URLs", () => {
   assert.equal(isReplikaTabUrl("https://my.replika.com/chat"), true);
   assert.equal(isReplikaTabUrl("https://replika.com/"), true);
