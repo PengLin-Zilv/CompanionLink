@@ -3,3 +3,6 @@ docs/superpowers/
 /docs/local/
 /CONTEXT.md
 /AGENTS.md
+
+# build artifacts - rebuild from extension/ instead of archiving
+/*.zip
