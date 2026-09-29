@@ -8,7 +8,7 @@ retrieves the selected chat history and creates the correctly named CSV locally.
 ```mermaid
 flowchart TD
     subgraph participant["Participant"]
-        A["Open Replika Web and sign in"] --> B["Open Companion Chat Log Export"]
+        A["Open Replika Web and sign in"] --> B["Open CompanionLink"]
         B --> C["Enter Participant ID and From / To dates"]
         C --> D["Click Export Chat Log"]
     end

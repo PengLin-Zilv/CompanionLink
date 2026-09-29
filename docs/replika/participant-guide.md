@@ -20,13 +20,13 @@ Have these items ready:
 1. Open the Chrome Web Store link provided by the research team.
 2. Click **Add to Chrome**.
 3. Click **Add extension** to confirm.
-4. Open Chrome's Extensions menu and select **Companion Chat Log Export**.
+4. Open Chrome's Extensions menu and select **CompanionLink**.
 
 ## Export Your Chat Log
 
 1. Open Replika web in Chrome and sign in.
 2. Refresh the Replika page and wait for the chat to load.
-3. Open **Companion Chat Log Export**.
+3. Open **CompanionLink**.
 4. Enter the Participant ID provided by the research team.
 5. Select the provided **From date** and **To date**.
 6. Click **Export Chat Log**.

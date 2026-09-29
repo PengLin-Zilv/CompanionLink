@@ -21,7 +21,7 @@ Before using the extension in a study:
 2. Click **Add to Chrome**, then confirm **Add extension**.
 3. Open Replika web and sign in with a test account.
 4. Refresh the Replika tab.
-5. Open **Companion Chat Log Export** from Chrome's Extensions menu.
+5. Open **CompanionLink** from Chrome's Extensions menu.
 6. Enter a test Participant ID and a short date range.
 7. Click **Export Chat Log**.
 8. Confirm that Chrome downloads a file named `P<Participant ID>.csv`.

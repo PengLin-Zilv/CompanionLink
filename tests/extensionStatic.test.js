@@ -8,7 +8,7 @@ test("extension manifest exposes only the MVP browser surfaces", async () => {
   const manifest = JSON.parse(await readFile("extension/manifest.json", "utf8"));
 
   assert.equal(manifest.manifest_version, 3);
-  assert.equal(manifest.name, "Companion Chat Log Export");
+  assert.equal(manifest.name, "CompanionLink");
   assert.equal(manifest.action.default_popup, "export.html");
   assert.deepEqual(manifest.permissions, ["activeTab", "scripting"]);
   assert.ok(manifest.host_permissions.includes("https://*.replika.ai/*"));
@@ -67,8 +67,8 @@ test("extension UI and bridge files are present", async () => {
 test("extension UI uses participant-friendly wording", async () => {
   const html = await readFile("extension/export.html", "utf8");
 
-  assert.match(html, /<title>Companion Chat Log Export<\/title>/);
-  assert.match(html, /<h1>Companion Chat Log Export<\/h1>/);
+  assert.match(html, /<title>CompanionLink<\/title>/);
+  assert.match(html, /<h1>CompanionLink<\/h1>/);
   assert.match(html, /<label for="participant-id">Participant ID<\/label>/);
   assert.match(html, /placeholder="Example: 040"/);
   assert.match(html, /Enter the participant ID, for example 040\./);

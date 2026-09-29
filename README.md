@@ -1,6 +1,6 @@
-# Companion Chat Log Export
+# CompanionLink
 
-Companion Chat Log Export is a LinkLab HCI research tool at Syracuse University for exporting participant-authorized chat history from supported AI companion web apps into a consistent CSV format.
+CompanionLink is a LinkLab HCI research tool at Syracuse University for exporting participant-authorized chat history from supported AI companion web apps into a consistent CSV format. Replika is the only app supported today; each newly supported app is named in that version's update notes.
 
 The current release candidate supports Replika. It replaces a manual workflow involving browser developer tools, configuration files, Python, and file renaming with a participant-facing Chrome extension.
 
@@ -18,7 +18,7 @@ Additional AI companion platforms will be evaluated and implemented as platform-
 
 ```text
 Open Replika Web and sign in
--> Open Companion Chat Log Export
+-> Open CompanionLink
 -> Enter the assigned Participant ID
 -> Select the From date and To date
 -> Click Export Chat Log
