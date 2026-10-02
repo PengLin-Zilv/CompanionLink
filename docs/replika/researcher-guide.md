@@ -19,7 +19,7 @@ Before using the extension in a study:
 
 1. Open the study's Chrome Web Store link in Chrome.
 2. Click **Add to Chrome**, then confirm **Add extension**.
-3. Open Replika web and sign in with a test account.
+3. Go to [my.replika.com](https://my.replika.com) and sign in with a test account.
 4. Refresh the Replika tab.
 5. Open **CompanionLink** from Chrome's Extensions menu.
 6. Enter a test Participant ID and a short date range.
@@ -69,11 +69,11 @@ Use UTC to distinguish repeated clock times when daylight saving time ends.
 
 ### "Open Replika in the active tab before exporting."
 
-Open the Replika web tab, confirm the participant is signed in, and try again without switching tabs.
+Make sure the active tab's address is my.replika.com. The extension works only on Replika's chat site, not on replika.com or other Replika pages. Confirm the participant is signed in, and try again without switching tabs.
 
 ### "No active Replika tab found."
 
-Open Replika web in Chrome, then reopen the extension.
+Open my.replika.com in Chrome, then reopen the extension.
 
 ### "Replika session was not captured."
 

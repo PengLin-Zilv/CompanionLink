@@ -22,12 +22,7 @@ export async function getReplikaInitMessage() {
 export function isReplikaTabUrl(url) {
   try {
     const { protocol, hostname } = new URL(url);
-    return protocol === "https:" && (
-      hostname === "replika.com" ||
-      hostname.endsWith(".replika.com") ||
-      hostname === "replika.ai" ||
-      hostname.endsWith(".replika.ai")
-    );
+    return protocol === "https:" && hostname === "my.replika.com";
   } catch {
     return false;
   }

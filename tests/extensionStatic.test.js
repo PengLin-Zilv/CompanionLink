@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-import { isReplikaTabUrl } from "../extension/sessionBridge.js";
+import { getReplikaInitMessage, isReplikaTabUrl } from "../extension/sessionBridge.js";
 
 test("extension manifest exposes only the MVP browser surfaces", async () => {
   const manifest = JSON.parse(await readFile("extension/manifest.json", "utf8"));
@@ -11,11 +11,27 @@ test("extension manifest exposes only the MVP browser surfaces", async () => {
   assert.equal(manifest.name, "CompanionLink");
   assert.equal(manifest.action.default_popup, "export.html");
   assert.deepEqual(manifest.permissions, ["activeTab", "scripting"]);
-  assert.ok(manifest.host_permissions.includes("https://*.replika.ai/*"));
-  assert.ok(manifest.host_permissions.includes("https://*.replika.com/*"));
-  assert.ok(manifest.host_permissions.includes("wss://ws.replika.ai/*"));
-  assert.ok(manifest.content_scripts[0].matches.includes("https://*.replika.com/*"));
-  assert.equal(manifest.content_scripts[0].js[0], "contentScript.js");
+  assert.deepEqual(manifest.host_permissions ?? [], []);
+  assert.deepEqual(manifest.optional_host_permissions ?? [], []);
+});
+
+test("session capture is registered only on the Replika chat host", async () => {
+  const manifest = JSON.parse(await readFile("extension/manifest.json", "utf8"));
+
+  assert.deepEqual(manifest.content_scripts, [{
+    matches: ["https://my.replika.com/*"],
+    js: ["contentScript.js"],
+    run_at: "document_start"
+  }]);
+});
+
+test("page bridge is exposed only to the Replika chat host", async () => {
+  const manifest = JSON.parse(await readFile("extension/manifest.json", "utf8"));
+
+  assert.deepEqual(manifest.web_accessible_resources, [{
+    resources: ["pageBridge.js"],
+    matches: ["https://my.replika.com/*"]
+  }]);
 });
 
 test("manifest and package versions match and are valid for Chrome", async () => {
@@ -38,12 +54,59 @@ test("manifest and package versions match and are valid for Chrome", async () =>
   }
 });
 
-test("session bridge accepts live Replika web tab URLs", () => {
-  assert.equal(isReplikaTabUrl("https://my.replika.com/chat"), true);
-  assert.equal(isReplikaTabUrl("https://replika.com/"), true);
-  assert.equal(isReplikaTabUrl("https://ws.replika.ai/v17"), true);
-  assert.equal(isReplikaTabUrl("https://example.com/replika.com"), false);
-  assert.equal(isReplikaTabUrl("chrome://extensions"), false);
+test("session bridge accepts HTTPS pages on the exact Replika chat host", () => {
+  for (const url of [
+    "https://my.replika.com/",
+    "https://my.replika.com/chat?view=messages#latest",
+    "https://my.replika.com/login",
+    "https://MY.REPLIKA.COM/"
+  ]) {
+    assert.equal(isReplikaTabUrl(url), true, url);
+  }
+});
+
+test("session bridge rejects non-chat hosts, lookalikes and non-HTTPS URLs", () => {
+  for (const url of [
+    "https://replika.com/",
+    "https://help.replika.com/",
+    "https://other.my.replika.com/",
+    "https://replika.ai/",
+    "https://my.replika.ai/",
+    "https://ws.replika.ai/v17",
+    "https://my.replika.com.example.com/",
+    "https://my.replika.com@example.com/",
+    "https://example.com/my.replika.com",
+    "http://my.replika.com/",
+    "wss://my.replika.com/",
+    "chrome://extensions",
+    "not a URL",
+    undefined
+  ]) {
+    assert.equal(isReplikaTabUrl(url), false, String(url));
+  }
+});
+
+test("session lookup refuses other Replika pages before injection or messaging", async (t) => {
+  const originalChrome = globalThis.chrome;
+  t.after(() => {
+    if (originalChrome === undefined) delete globalThis.chrome;
+    else globalThis.chrome = originalChrome;
+  });
+  const calls = [];
+  globalThis.chrome = {
+    tabs: {
+      query: async () => [{ id: 1, url: "https://help.replika.com/" }],
+      sendMessage: (_tabId, _message, respond) => {
+        calls.push("sendMessage");
+        respond({ initMessage: "test-session" });
+      }
+    },
+    scripting: { executeScript: async () => calls.push("executeScript") },
+    runtime: {}
+  };
+
+  await assert.rejects(getReplikaInitMessage(), /Open Replika in the active tab/);
+  assert.deepEqual(calls, []);
 });
 
 test("extension UI and bridge files are present", async () => {

@@ -24,7 +24,7 @@ Have these items ready:
 
 ## Export Your Chat Log
 
-1. Open Replika web in Chrome and sign in.
+1. In Chrome, go to [my.replika.com](https://my.replika.com) and sign in.
 2. Refresh the Replika page and wait for the chat to load.
 3. Open **CompanionLink**.
 4. Enter the Participant ID provided by the research team.
@@ -44,7 +44,7 @@ Submit the downloaded chat log file using the method provided by the research te
 
 ### The extension asks you to open Replika
 
-Open the Replika web tab, confirm that you are signed in, and try again without switching tabs.
+Make sure the active tab's address is my.replika.com (not replika.com), confirm that you are signed in, and try again without switching tabs.
 
 ### The Replika session was not captured
 

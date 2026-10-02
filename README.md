@@ -17,7 +17,7 @@ Additional AI companion platforms will be evaluated and implemented as platform-
 ## Participant Workflow
 
 ```text
-Open Replika Web and sign in
+Open my.replika.com and sign in
 -> Open CompanionLink
 -> Enter the assigned Participant ID
 -> Select the From date and To date
@@ -102,6 +102,21 @@ The extension does not:
 
 The only output is a CSV downloaded to the participant's computer.
 
+### Browser Permissions
+
+Automatic session capture and access to the page bridge are limited to
+`https://my.replika.com/*`, the supported Replika chat site. The extension rejects
+other sites before injecting scripts or requesting a session.
+
+- `activeTab` permits reading the active tab's URL when the extension is opened.
+- `scripting`, together with that temporary access, lets the popup ensure its
+  content script is installed on the supported chat tab.
+
+No explicit `host_permissions` are requested. This does not mean zero site
+access: the manifest still declares a content script on the chat site to capture
+the session at page load. Export connects to `wss://ws.replika.ai/v17` only after
+submission; the WebSocket endpoint is not a supported browser tab.
+
 ## Release Status
 
 Version `0.1.0` is a pre-release Replika build. Participant distribution is planned through an unlisted Chrome Web Store listing after release validation and policy review.
@@ -112,7 +127,7 @@ For local development and testing:
 2. Turn on **Developer mode**.
 3. Click **Load unpacked**.
 4. Select the repository's `extension` folder.
-5. Refresh any open Replika tab before testing.
+5. Refresh any open my.replika.com tab before testing.
 
 This unpacked installation flow is for development, not the planned participant workflow.
 
