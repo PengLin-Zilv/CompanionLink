@@ -119,7 +119,7 @@ submission; the WebSocket endpoint is not a supported browser tab.
 
 ## Release Status
 
-Version `0.1.0` is a pre-release Replika build. Participant distribution is planned through an unlisted Chrome Web Store listing after release validation and policy review.
+Version `0.1.0` is released and unlisted in Chrome Store.
 
 For local development and testing:
 
@@ -145,8 +145,9 @@ While the major version is `0`, the CSV schema is not frozen, and a breaking cha
 | --- | --- |
 | `0.1.0` | First unlisted Chrome Web Store upload |
 | `0.1.x` | Fixes after an upload, however small |
-| `0.2.0` | New features that keep the current CSV schema |
-| `0.3.0` | Kindroid connector or a CSV column change |
+| `0.2.0` | Kindroid connector, keeping the eight-column CSV |
+| `0.3.0` | The next platform after Kindroid (ChatGPT, Gemini or Claude), once its feasibility check passes |
+| later `0.x.0` | Each further platform, feature or CSV column change |
 | `1.0.0` | CSV schema frozen for a running study |
 
 Tag every uploaded build so the published package maps to a commit:
