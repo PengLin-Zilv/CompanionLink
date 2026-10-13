@@ -36,7 +36,7 @@ export function messagesToRows(historyEvent, timeZone = Intl.DateTimeFormat().re
       Timestamp_UTC: date.toISOString(),
       Timestamp_Eastern: formatTimestamp(date, easternFormatter),
       From: message.meta.nature === "Robot" ? "Rep" : "Me",
-      Text: String(message.content?.text ?? "").replaceAll("\n", "\\n"),
+      Text: String(message.content?.text ?? ""),
       Reaction: reactions.get(message.id) ?? "None",
       ID: message.id
     });

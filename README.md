@@ -69,8 +69,9 @@ The remaining Replika mapping preserves the existing backup behavior:
 
 - Replika messages use `Rep` and participant messages use `Me`;
 - missing reactions use `None`;
-- message line breaks are preserved as literal `\n`;
 - rows are ordered newest to oldest.
+
+Line breaks inside a message stay real line breaks, in a quoted cell, as standard CSV requires. Excel, pandas and R read such a message as one cell; tools that read the file line by line see one message across several lines. Version 0.1.0 and the legacy backup script wrote them as the two characters `\n`.
 
 An export with no messages in the selected range produces a header-only CSV.
 
@@ -145,7 +146,7 @@ While the major version is `0`, the CSV schema is not frozen, and a breaking cha
 | --- | --- |
 | `0.1.0` | First unlisted Chrome Web Store upload |
 | `0.1.x` | Fixes after an upload, however small |
-| `0.2.0` | Kindroid connector, keeping the eight-column CSV |
+| `0.2.0` | Kindroid connector, keeping the eight-column CSV; message line breaks stay real line breaks |
 | `0.3.0` | The next platform after Kindroid (ChatGPT, Gemini or Claude), once its feasibility check passes |
 | later `0.x.0` | Each further platform, feature or CSV column change |
 | `1.0.0` | CSV schema frozen for a running study |

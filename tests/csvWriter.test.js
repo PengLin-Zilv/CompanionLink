@@ -67,7 +67,7 @@ test("maps v17 history messages to current lab CSV rows newest-to-oldest", () =>
       Timestamp_UTC: "2026-07-08T20:36:32.000Z",
       Timestamp_Eastern: "2026-07-08 16:36:32",
       From: "Me",
-      Text: "Sometimes I think it\\nspills over",
+      Text: "Sometimes I think it\nspills over",
       Reaction: "None",
       ID: "msg-me-old"
     }
@@ -92,7 +92,7 @@ test("builds Python csv.writer compatible CSV text", () => {
       Timestamp_UTC: "2026-07-08T20:36:32.000Z",
       Timestamp_Eastern: "2026-07-08 16:36:32",
       From: "Me",
-      Text: "Sometimes I think it\\nspills over",
+      Text: "Sometimes I think it\nspills over",
       Reaction: "None",
       ID: "msg-me-old"
     }
@@ -102,7 +102,7 @@ test("builds Python csv.writer compatible CSV text", () => {
     buildCsv(rows),
     "Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID\r\n" +
       "2026-07-08 13:36:40,America/Los_Angeles,2026-07-08T20:36:40.000Z,2026-07-08 16:36:40,Rep,\"Hello, \"\"there\"\"\",Love,msg-rep-new\r\n" +
-      "2026-07-08 13:36:32,America/Los_Angeles,2026-07-08T20:36:32.000Z,2026-07-08 16:36:32,Me,Sometimes I think it\\nspills over,None,msg-me-old\r\n"
+      "2026-07-08 13:36:32,America/Los_Angeles,2026-07-08T20:36:32.000Z,2026-07-08 16:36:32,Me,\"Sometimes I think it\nspills over\",None,msg-me-old\r\n"
   );
 });
 

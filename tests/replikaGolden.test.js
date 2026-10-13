@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 
-// Pins the exact bytes the released Replika export (v0.1.0) downloads. Each
+// Pins the exact bytes the Replika export downloads. Each
 // synthetic message ID names the rule it covers. Changing these bytes changes
 // participants' data: update the golden only on purpose, with the README's
 // Output Format and a new version.
@@ -34,17 +34,17 @@ const GOLDEN_ROWS = [
   "2026-10-31 08:00:00,America/Los_Angeles,2026-10-31T15:00:00.000Z,2026-10-31 11:00:00,Me,Numeric id and epoch time,None,4242",
   "2026-10-31 07:00:00,America/Los_Angeles,2026-10-31T14:00:00.000Z,2026-10-31 10:00:00,Rep,Offset timestamp,None,b2-offset",
   "2026-10-31 06:00:00,America/Los_Angeles,2026-10-31T13:00:00.000Z,2026-10-31 09:00:00,Rep,\"She said \"\"hi\"\", then left\",Like,b2-quote-comma",
-  "2026-10-31 05:30:00,America/Los_Angeles,2026-10-31T12:30:00.000Z,2026-10-31 08:30:00,Me,\"Windows\r\\nline\",None,b2-crlf",
+  "2026-10-31 05:30:00,America/Los_Angeles,2026-10-31T12:30:00.000Z,2026-10-31 08:30:00,Me,\"Windows\r\nline\",None,b2-crlf",
   "2026-10-31 05:00:00,America/Los_Angeles,2026-10-31T12:00:00.000Z,2026-10-31 08:00:00,Me,\"Carriage\rreturn\",None,b2-cr",
-  "2026-10-31 02:00:00,America/Los_Angeles,2026-10-31T09:00:00.000Z,2026-10-31 05:00:00,Rep,*smiles*\\n\\nHow was your day?,Love,b3-paragraphs",
-  "2026-10-31 01:15:30,America/Los_Angeles,2026-10-31T08:15:30.250Z,2026-10-31 04:15:30,Me,Line one\\nLine two,None,b3-lf",
+  "2026-10-31 02:00:00,America/Los_Angeles,2026-10-31T09:00:00.000Z,2026-10-31 05:00:00,Rep,\"*smiles*\n\nHow was your day?\",Love,b3-paragraphs",
+  "2026-10-31 01:15:30,America/Los_Angeles,2026-10-31T08:15:30.250Z,2026-10-31 04:15:30,Me,\"Line one\nLine two\",None,b3-lf",
   "2026-10-31 00:00:00,America/Los_Angeles,2026-10-31T07:00:00.000Z,2026-10-31 03:00:00,Rep,Good morning,None,b3-at-start"
 ];
 
 test("golden Replika export downloads exactly the pinned bytes", () => {
   const result = runGolden("2026-10-31", "2026-11-01");
   assert.equal(result.bytes.toString("utf8"), `${[HEADER, ...GOLDEN_ROWS].join("\r\n")}\r\n`);
-  assert.equal(sha256(result.bytes), "b3506eca031ff0b1b15f938ace55eaa3f897eb0de01a3c6a9a7a9fb046cfebc6");
+  assert.equal(sha256(result.bytes), "a9a871b60722df584ce8f0a2f823fd18f128feef7385338f365f8bf3b95ea33c");
   assert.equal(result.filename, "P040.csv");
   // The requests decide which messages exist to be written: cursor, limit, stop.
   assert.deepEqual(result.historyRequests, [
