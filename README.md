@@ -54,7 +54,7 @@ The CSV header is:
 Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID
 ```
 
-The file is UTF-8 with a byte order mark, so Excel opened by double-click shows emoji and non-English text correctly. In base R, read it with `fileEncoding = "UTF-8-BOM"`; with Python's `csv` module, open it with `encoding="utf-8-sig"`. Version 0.1.0 wrote no byte order mark.
+The file is UTF-8 with a byte order mark, so Excel opened by double-click shows emoji and non-English text correctly. In base R, read it with `fileEncoding = "UTF-8-BOM"`; with Python's `csv` module, open it with `open(path, encoding="utf-8-sig", newline="")`. Without `newline=""`, Python changes line breaks inside messages (`\r\n` and a lone `\r` become `\n`). Version 0.1.0 wrote no byte order mark.
 
 | Column | Meaning |
 | --- | --- |
