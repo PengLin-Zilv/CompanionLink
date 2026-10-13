@@ -5,9 +5,47 @@
 
 const ENDPOINT = "https://api.kindroid.ai/v1/get-chat-messages";
 const PAGE_SIZE = 100;
-const RESPONSE_TIMEOUT_MS = 30000;
+// Live check, October 13, 2026: one response took 25.4 s.
+const RESPONSE_TIMEOUT_MS = 60000;
 // Rejects a timestamp in seconds, which would otherwise read as 1970.
 const EARLIEST_PLAUSIBLE_MS = Date.UTC(2020, 0, 1);
+// Kindroid allows 10 requests per 30 s per account and sends no Retry-After. We use 9,
+// leaving one for the participant's other apps or a request counted twice.
+const REQUESTS_PER_WINDOW = 9;
+const WINDOW_MS = 31000;
+
+// Paces requests made one at a time: each waits until the request nine back ended over
+// 31 s ago. The server counts a request somewhere between its send and its end, so
+// anchoring on the end keeps any 30 s at the server to nine of ours, however slow a
+// response is. Every request ends here, whatever its outcome.
+export function createPacer({
+  now = () => performance.now(),
+  sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+} = {}) {
+  const ends = [];
+  return {
+    async run(task, onWait) {
+      let waitMs;
+      while (ends.length === REQUESTS_PER_WINDOW && (waitMs = ends[0] + WINDOW_MS - now()) > 0) {
+        onWait(waitMs);
+        await sleep(waitMs);
+      }
+      try {
+        return await task();
+      } finally {
+        ends.push(now());
+        if (ends.length > REQUESTS_PER_WINDOW) ends.shift();
+      }
+    },
+    // After a 429 the window is full, whatever we counted.
+    markFull() {
+      ends.splice(0, ends.length, ...Array(REQUESTS_PER_WINDOW).fill(now()));
+    }
+  };
+}
+
+// One pacer for the page, so a hand retry in the same popup shares the window.
+const pagePacer = createPacer();
 
 // Only a one-to-one chat page: https://kindroid.ai/v2/chat/<ai_id>.
 // Group (/v2/chat/group/...), room and V1 pages do not match.
@@ -28,10 +66,20 @@ export async function exportKindroidHistory({
   aiId,
   studyWindow,
   onProgress = () => {},
+  onWait = () => {},
   fetchImpl = globalThis.fetch,
-  pageSize = PAGE_SIZE
+  pageSize = PAGE_SIZE,
+  pacer = pagePacer
 }) {
-  const request = (params) => requestPage(fetchImpl, apiKey, { ai_id: aiId, ...params });
+  // Every request goes through the pacer, and its timeout starts only after the wait.
+  const request = async (params) => {
+    try {
+      return await pacer.run(() => requestPage(fetchImpl, apiKey, { ai_id: aiId, ...params }), onWait);
+    } catch (error) {
+      if (error.status === 429) pacer.markFull();
+      throw error;
+    }
+  };
 
   // An unknown ai_id returns HTTP 200 with no messages, so first check the chat
   // has any message at all. This also rejects a bad key before paging.
@@ -108,7 +156,7 @@ async function requestPage(fetchImpl, apiKey, params) {
     throw new Error("Could not reach Kindroid. Check your connection and try again.");
   }
   if (!response.ok) {
-    throw new Error(statusMessage(response.status));
+    throw Object.assign(new Error(statusMessage(response.status)), { status: response.status });
   }
 
   let body;

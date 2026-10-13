@@ -1,6 +1,8 @@
 // Kindroid export through the real popup: a fake Kindroid API, the raw bytes handed
 // to the download, and the state left behind.
-// Usage: kindroidExport.mjs <ok | http401 | nokey | notkn | zerowidth>
+// Usage: kindroidExport.mjs <ok | http401 | nokey | notkn | zerowidth | retry429>
+// retry429: the first request gets 429; the participant pastes the key again and
+// submits once more in the same popup, on a fake clock so the pacing wait is instant.
 const NativeDate = Date;
 globalThis.Date = class extends NativeDate {
   constructor(...args) {
@@ -9,6 +11,11 @@ globalThis.Date = class extends NativeDate {
 };
 
 const scenario = process.argv[2];
+let fakeNow = 0;
+if (scenario === "retry429") {
+  performance.now = () => fakeNow;
+  globalThis.setTimeout = (callback, ms) => { fakeNow += ms; queueMicrotask(callback); return 0; };
+}
 const keys = { nokey: "", notkn: "abc123", zerowidth: `kn_abc${String.fromCharCode(0x200b)}def` };
 const apiKey = keys[scenario] ?? "  kn_fixturekey  ";
 let submit;
@@ -66,14 +73,17 @@ const chat = [
 const formFields = ["#participant-id", "#from-date", "#to-date", "#api-key", "#export-button"];
 const disabledState = () => formFields.map((s) => Boolean(elements.get(s).disabled));
 const requests = [];
+const sends = [];
 let disabledDuringExport = null;
 globalThis.fetch = async (url, init) => {
   disabledDuringExport ??= disabledState();
+  sends.push({ at: fakeNow, status: elements.get("#status").textContent, progress: elements.get("#progress").textContent });
   // A setting change mid-export must not change the zone captured at submit.
   process.env.TZ = "America/New_York";
   const u = new URL(url);
   requests.push({ origin: u.origin + u.pathname, params: Object.fromEntries(u.searchParams), auth: init.headers.Authorization });
   if (scenario === "http401") return new Response("Unauthorized", { status: 401 });
+  if (scenario === "retry429" && requests.length === 1) return new Response("Too Many Requests (API limit)", { status: 429 });
   const limit = Number(u.searchParams.get("limit"));
   const after = u.searchParams.has("start_after_timestamp") ? Number(u.searchParams.get("start_after_timestamp")) : -Infinity;
   const page = chat.filter((m) => m.timestamp > after).slice(0, limit);
@@ -86,7 +96,15 @@ globalThis.fetch = async (url, init) => {
 await import("../../extension/export.js");
 await submit({ preventDefault() {} });
 const element = (selector) => elements.get(selector);
+let firstStatus;
+if (scenario === "retry429") {
+  firstStatus = element("#status").textContent;
+  element("#api-key").value = apiKey;
+  await submit({ preventDefault() {} });
+}
 console.log(JSON.stringify({
+  firstStatus,
+  sends,
   filename,
   bytes: downloadedBlob ? Buffer.from(await downloadedBlob.arrayBuffer()).toString("base64") : null,
   status: element("#status").textContent,

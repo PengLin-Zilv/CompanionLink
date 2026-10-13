@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createStudyWindow } from "../extension/studyWindow.js";
-import { exportKindroidHistory, parseKindroidChatUrl } from "../extension/kindroidClient.js";
+import { createPacer, exportKindroidHistory, parseKindroidChatUrl } from "../extension/kindroidClient.js";
 
 // 2026-09-29 in America/New_York is [04:00Z on the 29th, 04:00Z on the 30th).
 const studyWindow = createStudyWindow({
@@ -36,8 +36,29 @@ function mockServer(messages, { status = 200, body } = {}) {
   return { fetchImpl, calls };
 }
 
+// Sleeping advances the fake clock at once, so pacing never makes a test wait.
+function fakeClock() {
+  const clock = { t: 0 };
+  clock.pacer = createPacer({ now: () => clock.t, sleep: async (ms) => { clock.t += ms; } });
+  return clock;
+}
+
+// Wraps mockServer to record when each call was sent and ended on the fake clock.
+function timedServer(clock, messages, { latency = () => 200, failAt = -1, failure } = {}) {
+  const inner = mockServer(messages);
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    const call = { sentAt: clock.t };
+    calls.push(call);
+    clock.t += latency(calls.length - 1);
+    call.endedAt = clock.t;
+    return calls.length - 1 === failAt ? failure() : inner.fetchImpl(url, init);
+  };
+  return { fetchImpl, calls };
+}
+
 const run = (server, options = {}) => exportKindroidHistory({
-  apiKey: "kn_test", aiId: "AI1", studyWindow, fetchImpl: server.fetchImpl, pageSize: 2, ...options
+  apiKey: "kn_test", aiId: "AI1", studyWindow, fetchImpl: server.fetchImpl, pageSize: 2, pacer: fakeClock().pacer, ...options
 });
 const pageBody = (messages) => JSON.stringify({ messages, pagination: { hasMore: false } });
 
@@ -143,6 +164,71 @@ test("a page that breaks the tested ordering or cursor rules is an error", async
 test("a cursor that cannot advance is an error, not a loop", async () => {
   const same = ["s1", "s2", "s3"].map((id) => message(id, "2026-09-29T10:00:00Z"));
   await assert.rejects(run(mockServer(same)), /same messages/);
+});
+
+// 52 messages one minute apart inside the window: with pageSize 2 the walk makes
+// about 53 calls, enough for several pacing waits.
+const busyChat = Array.from({ length: 52 }, (_, i) =>
+  message(`m${i}`, new Date(studyWindow.startMs + (i + 1) * 60000).toISOString(), i % 2 ? "user" : "ai"));
+
+test("each request waits until the request nine back ended over 31 s ago", async () => {
+  const clock = fakeClock();
+  const waits = [];
+  // Slow calls like the live check's 5.5 s and 25.4 s: pacing must anchor on the end.
+  const server = timedServer(clock, busyChat, { latency: (n) => (n === 0 ? 5500 : n === 13 ? 25400 : 200) });
+  const { records } = await run(server, { pacer: clock.pacer, onWait: (ms) => waits.push(ms) });
+
+  assert.equal(records.length, 52);
+  const expectedWaits = [];
+  server.calls.forEach((call, n) => {
+    const previousEnd = n ? server.calls[n - 1].endedAt : 0;
+    const earliest = Math.max(previousEnd, n >= 9 ? server.calls[n - 9].endedAt + 31000 : -Infinity);
+    assert.equal(call.sentAt, earliest, `call ${n}`);
+    if (earliest > previousEnd) expectedWaits.push(earliest - previousEnd);
+  });
+  assert.deepEqual(waits, expectedWaits);
+  assert.ok(waits.length >= 3);
+});
+
+test("each request's 60 s timeout starts after its pacing wait", async (t) => {
+  const clock = fakeClock();
+  const timeouts = [];
+  const original = AbortSignal.timeout;
+  AbortSignal.timeout = (ms) => { timeouts.push({ at: clock.t, ms }); return original.call(AbortSignal, ms); };
+  t.after(() => { AbortSignal.timeout = original; });
+
+  const server = timedServer(clock, busyChat);
+  await run(server, { pacer: clock.pacer });
+  assert.deepEqual(timeouts, server.calls.map((call) => ({ at: call.sentAt, ms: 60000 })));
+});
+
+test("a failed request still counts, and the pacer outlives one export", async () => {
+  for (const failure of [
+    () => { throw new TypeError("Failed to fetch"); },
+    () => { throw new DOMException("timed out", "TimeoutError"); },
+    () => new Response("Error", { status: 503 }),
+    () => new Response("<html>", { status: 200 })
+  ]) {
+    const clock = fakeClock();
+    const failed = timedServer(clock, busyChat, { failAt: 8, failure });
+    await assert.rejects(run(failed, { pacer: clock.pacer }));
+    const next = timedServer(clock, busyChat);
+    await run(next, { pacer: clock.pacer });
+    assert.equal(next.calls[0].sentAt, failed.calls[0].endedAt + 31000);
+  }
+});
+
+test("a 429 fills the window, so a retry in the same popup waits it out", async () => {
+  const clock = fakeClock();
+  const waits = [];
+  const limited = timedServer(clock, chat, {
+    failAt: 0, failure: () => new Response("Too Many Requests (API limit)", { status: 429 })
+  });
+  await assert.rejects(run(limited, { pacer: clock.pacer }), /limiting requests/);
+  const retry = timedServer(clock, chat);
+  await run(retry, { pacer: clock.pacer, onWait: (ms) => waits.push(ms) });
+  assert.equal(retry.calls[0].sentAt, limited.calls[0].endedAt + 31000);
+  assert.deepEqual(waits, [31000]);
 });
 
 test("only one-to-one v2 chat pages are accepted", () => {

@@ -73,9 +73,20 @@ async function exportReplika(studyWindow) {
   return { rows: await exportHistory({ initMessage, studyWindow, onProgress: showProgress }) };
 }
 
+// Pacing can pause a long export for up to 31 s at a time, and clicking outside the
+// popup closes it, so say both.
 async function exportKindroid(apiKey, aiId, studyWindow) {
-  showStatus("Exporting Kindroid chat history...");
-  const { records, companionName } = await exportKindroidHistory({ apiKey, aiId, studyWindow, onProgress: showProgress });
+  showStatus("Exporting Kindroid chat history. Keep this window open until the file downloads; clicking outside it stops the export.");
+  let count = 0;
+  const { records, companionName } = await exportKindroidHistory({
+    apiKey,
+    aiId,
+    studyWindow,
+    onProgress: (n) => { count = n; showProgress(n); },
+    onWait: (ms) => {
+      progressText.textContent = `${count} messages so far. Waiting ${Math.ceil(ms / 1000)} s (Kindroid allows 10 requests every 30 seconds).`;
+    }
+  });
   return { rows: recordsToRows(records, studyWindow.timeZone), chatName: companionName };
 }
 

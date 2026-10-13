@@ -36,6 +36,9 @@ test("golden Kindroid export downloads exactly the pinned bytes and clears the k
   assert.equal(result.status, "Downloaded P040.csv (chat with B)");
   assert.equal(result.progress, "6 messages exported");
   assert.equal(result.keyAfter, "");
+  // Clicking outside the popup closes it and stops the export, so say so throughout.
+  assert.equal(result.sends[0].status,
+    "Exporting Kindroid chat history. Keep this window open until the file downloads; clicking outside it stops the export.");
   assert.deepEqual(result.disabledDuringExport, [true, true, true, true, true]);
   assert.deepEqual(result.disabled, enabled);
   // The trimmed key travels only in the header; the window starts the walk.
@@ -57,6 +60,14 @@ test("a Kindroid error downloads nothing, shows the error and still clears the k
   assert.equal(result.progress, "");
   assert.equal(result.keyAfter, "");
   assert.deepEqual(result.disabled, enabled);
+});
+
+test("after a 429, a second submit in the same popup waits out the window and says so", () => {
+  const result = runKindroid("retry429");
+  assert.match(result.firstStatus, /limiting requests/);
+  assert.equal(result.status, "Downloaded P040.csv (chat with B)");
+  assert.deepEqual(result.sends.map((send) => send.at), [0, 31000, 31000]);
+  assert.equal(result.sends[1].progress, "0 messages so far. Waiting 31 s (Kindroid allows 10 requests every 30 seconds).");
 });
 
 test("a missing or malformed key is rejected before any request and kept for correction", () => {
