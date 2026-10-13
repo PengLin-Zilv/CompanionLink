@@ -13,6 +13,7 @@ const elements = new Map([
   ["#participant-id", { value: "040" }],
   ["#from-date", { value: "2026-09-07" }],
   ["#to-date", { value: "2026-09-07" }],
+  ["#api-key", { value: "" }],
   ["#export-button", {}],
   ["#status", { dataset: {} }],
   ["#progress", {}],

@@ -1,5 +1,5 @@
-import { buildCsv, normalizeParticipantFilename } from "./csvWriter.js";
-import { parseKindroidChatUrl } from "./kindroidClient.js";
+import { buildCsv, normalizeParticipantFilename, recordsToRows } from "./csvWriter.js";
+import { exportKindroidHistory, parseKindroidChatUrl } from "./kindroidClient.js";
 import { getReplikaInitMessage, isReplikaTabUrl } from "./sessionBridge.js";
 import { createStudyWindow } from "./studyWindow.js";
 import { exportHistory } from "./v17Client.js";
@@ -8,6 +8,7 @@ const form = document.querySelector("#export-form");
 const participantIdInput = document.querySelector("#participant-id");
 const fromDateInput = document.querySelector("#from-date");
 const toDateInput = document.querySelector("#to-date");
+const apiKeyInput = document.querySelector("#api-key");
 const exportButton = document.querySelector("#export-button");
 const statusText = document.querySelector("#status");
 const progressText = document.querySelector("#progress");
@@ -22,6 +23,9 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const submittedAt = new Date();
+  const opened = await openedTab;
+  const isKindroid = opened.platform === "kindroid";
+  const apiKey = isKindroid ? apiKeyInput.value.trim() : "";
   let filename;
   let studyWindow;
   try {
@@ -31,36 +35,53 @@ form.addEventListener("submit", async (event) => {
       endDate: toDateInput.value,
       submittedAt
     });
+    // Printable ASCII only: an invisible pasted character would make fetch reject
+    // the header, which would read as a network error.
+    if (isKindroid && !/^kn_[!-~]+$/.test(apiKey)) {
+      throw new Error("Paste your Kindroid API key. It starts with kn_.");
+    }
   } catch (error) {
     showError(error.message);
     return;
   }
 
   setWorking(true);
-  showStatus("Finding Replika session...");
   progressText.textContent = "";
 
   try {
-    const initMessage = await getReplikaInitMessage();
-    showStatus("Exporting chat history...");
-
-    const rows = await exportHistory({
-      initMessage,
-      studyWindow,
-      onProgress: (count) => {
-        progressText.textContent = `${count} messages`;
-      }
-    });
+    // The chat named when the popup opened is the one exported.
+    const { rows, chatName } = await (isKindroid
+      ? exportKindroid(apiKey, opened.aiId, studyWindow)
+      : exportReplika(studyWindow));
 
     downloadText(filename, buildCsv(rows));
-    showStatus(`Downloaded ${filename}`);
+    showStatus(`Downloaded ${filename}${chatName ? ` (chat with ${chatName})` : ""}`);
     progressText.textContent = `${rows.length} messages exported`;
   } catch (error) {
     showError(error.message);
   } finally {
+    // The key is never stored; it leaves the field once an export attempt ends.
+    if (isKindroid) apiKeyInput.value = "";
     setWorking(false);
   }
 });
+
+async function exportReplika(studyWindow) {
+  showStatus("Finding Replika session...");
+  const initMessage = await getReplikaInitMessage();
+  showStatus("Exporting chat history...");
+  return { rows: await exportHistory({ initMessage, studyWindow, onProgress: showProgress }) };
+}
+
+async function exportKindroid(apiKey, aiId, studyWindow) {
+  showStatus("Exporting Kindroid chat history...");
+  const { records, companionName } = await exportKindroidHistory({ apiKey, aiId, studyWindow, onProgress: showProgress });
+  return { rows: recordsToRows(records, studyWindow.timeZone), chatName: companionName };
+}
+
+function showProgress(count) {
+  progressText.textContent = `${count} messages`;
+}
 
 // Never rejects: a failed lookup counts as an unsupported page.
 async function readOpenedTab() {
@@ -87,6 +108,7 @@ function setWorking(isWorking) {
   participantIdInput.disabled = isWorking;
   fromDateInput.disabled = isWorking;
   toDateInput.disabled = isWorking;
+  apiKeyInput.disabled = isWorking;
 }
 
 function showStatus(message) {

@@ -15,6 +15,7 @@ const elements = new Map([
   ["#participant-id", { value: "040" }],
   ["#from-date", { value: fromDate }],
   ["#to-date", { value: toDate }],
+  ["#api-key", { value: "" }],
   ["#export-button", {}],
   ["#status", { dataset: {} }],
   ["#progress", {}],

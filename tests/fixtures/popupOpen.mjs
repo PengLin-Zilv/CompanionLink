@@ -6,6 +6,7 @@ const elements = new Map([
   ["#participant-id", {}],
   ["#from-date", {}],
   ["#to-date", {}],
+  ["#api-key", {}],
   ["#export-button", {}],
   ["#status", { dataset: {} }],
   ["#progress", {}],
