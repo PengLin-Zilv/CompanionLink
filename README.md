@@ -54,6 +54,8 @@ The CSV header is:
 Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID
 ```
 
+The file is UTF-8 with a byte order mark, so Excel opened by double-click shows emoji and non-English text correctly. In base R, read it with `fileEncoding = "UTF-8-BOM"`; with Python's `csv` module, open it with `encoding="utf-8-sig"`. Version 0.1.0 wrote no byte order mark.
+
 | Column | Meaning |
 | --- | --- |
 | `Timestamp_Local` | Message time in the computer's detected time zone, `YYYY-MM-DD HH:mm:ss` |
@@ -146,7 +148,7 @@ While the major version is `0`, the CSV schema is not frozen, and a breaking cha
 | --- | --- |
 | `0.1.0` | First unlisted Chrome Web Store upload |
 | `0.1.x` | Fixes after an upload, however small |
-| `0.2.0` | Kindroid connector, keeping the eight-column CSV; message line breaks stay real line breaks |
+| `0.2.0` | Kindroid connector, keeping the eight-column CSV; message line breaks stay real line breaks; UTF-8 with a byte order mark |
 | `0.3.0` | The next platform after Kindroid (ChatGPT, Gemini or Claude), once its feasibility check passes |
 | later `0.x.0` | Each further platform, feature or CSV column change |
 | `1.0.0` | CSV schema frozen for a running study |

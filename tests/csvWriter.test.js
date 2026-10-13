@@ -100,14 +100,14 @@ test("builds Python csv.writer compatible CSV text", () => {
 
   assert.equal(
     buildCsv(rows),
-    "Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID\r\n" +
+    "\uFEFFTimestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID\r\n" +
       "2026-07-08 13:36:40,America/Los_Angeles,2026-07-08T20:36:40.000Z,2026-07-08 16:36:40,Rep,\"Hello, \"\"there\"\"\",Love,msg-rep-new\r\n" +
       "2026-07-08 13:36:32,America/Los_Angeles,2026-07-08T20:36:32.000Z,2026-07-08 16:36:32,Me,\"Sometimes I think it\nspills over\",None,msg-me-old\r\n"
   );
 });
 
 test("builds a header-only CSV when the study window has no messages", () => {
-  assert.equal(buildCsv([]), "Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID\r\n");
+  assert.equal(buildCsv([]), "\uFEFFTimestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID\r\n");
 });
 
 test("uses each message's daylight-saving offset and retains distinct UTC instants", () => {

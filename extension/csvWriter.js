@@ -51,7 +51,8 @@ export function buildCsv(rows) {
     ...rows.map((row) => CSV_COLUMNS.map((column) => escapeCsvCell(row[column])).join(","))
   ];
 
-  return `${lines.join("\r\n")}\r\n`;
+  // The byte order mark lets Excel read the file as UTF-8.
+  return `\uFEFF${lines.join("\r\n")}\r\n`;
 }
 
 function createTimestampFormatter(timeZone) {

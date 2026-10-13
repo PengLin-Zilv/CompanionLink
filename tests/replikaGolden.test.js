@@ -43,8 +43,8 @@ const GOLDEN_ROWS = [
 
 test("golden Replika export downloads exactly the pinned bytes", () => {
   const result = runGolden("2026-10-31", "2026-11-01");
-  assert.equal(result.bytes.toString("utf8"), `${[HEADER, ...GOLDEN_ROWS].join("\r\n")}\r\n`);
-  assert.equal(sha256(result.bytes), "a9a871b60722df584ce8f0a2f823fd18f128feef7385338f365f8bf3b95ea33c");
+  assert.equal(result.bytes.toString("utf8"), `\uFEFF${[HEADER, ...GOLDEN_ROWS].join("\r\n")}\r\n`);
+  assert.equal(sha256(result.bytes), "427109ad7a996080ec8f1e073200811199cf87ccab387dfbb768550c4898f060");
   assert.equal(result.filename, "P040.csv");
   // The requests decide which messages exist to be written: cursor, limit, stop.
   assert.deepEqual(result.historyRequests, [
@@ -54,11 +54,11 @@ test("golden Replika export downloads exactly the pinned bytes", () => {
   ]);
 });
 
-test("golden Replika export of an empty window downloads only the 86-byte header", () => {
+test("golden Replika export of an empty window downloads only the BOM and header, 89 bytes", () => {
   const result = runGolden("2026-10-20", "2026-10-20");
-  assert.equal(result.bytes.toString("utf8"), `${HEADER}\r\n`);
-  assert.equal(result.bytes.length, 86);
-  assert.equal(sha256(result.bytes), "1632690ecab93bb59f5d3b8ba7203644872d499cccd10d7918667118a060c176");
+  assert.equal(result.bytes.toString("utf8"), `\uFEFF${HEADER}\r\n`);
+  assert.equal(result.bytes.length, 89);
+  assert.equal(sha256(result.bytes), "ba072775a67ec22a2f7fc14a050421b9f6a29fc528cae17391fb4888d6816e71");
   assert.equal(result.filename, "P040.csv");
   assert.deepEqual(result.historyRequests, [
     { chat_id: "f", limit: 1000 },
