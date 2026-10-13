@@ -4,7 +4,8 @@ import assert from "node:assert/strict";
 import {
   buildCsv,
   messagesToRows,
-  normalizeParticipantFilename
+  normalizeParticipantFilename,
+  recordsToRows
 } from "../extension/csvWriter.js";
 
 test("normalizes participant IDs into P-prefixed CSV filenames", () => {
@@ -104,6 +105,49 @@ test("builds Python csv.writer compatible CSV text", () => {
       "2026-07-08 13:36:40,America/Los_Angeles,2026-07-08T20:36:40.000Z,2026-07-08 16:36:40,Rep,\"Hello, \"\"there\"\"\",Love,msg-rep-new\r\n" +
       "2026-07-08 13:36:32,America/Los_Angeles,2026-07-08T20:36:32.000Z,2026-07-08 16:36:32,Me,\"Sometimes I think it\nspills over\",None,msg-me-old\r\n"
   );
+});
+
+test("turns platform-neutral records into CSV rows without reordering them", () => {
+  // Oldest first on purpose: ordering belongs to each platform, never to shared code.
+  const records = [
+    { id: "k1", instantMs: Date.parse("2026-11-01T08:30:00.123Z"), from: "Me", text: "", reaction: "N/A" },
+    { id: "k2", instantMs: Date.parse("2026-11-01T09:30:00.456Z"), from: "Kin", text: "Two\n\nparagraphs", reaction: "N/A" }
+  ];
+
+  assert.deepEqual(recordsToRows(records, "America/Los_Angeles"), [
+    {
+      Timestamp_Local: "2026-11-01 01:30:00",
+      Local_Timezone: "America/Los_Angeles",
+      Timestamp_UTC: "2026-11-01T08:30:00.123Z",
+      Timestamp_Eastern: "2026-11-01 03:30:00",
+      From: "Me",
+      Text: "",
+      Reaction: "N/A",
+      ID: "k1"
+    },
+    {
+      Timestamp_Local: "2026-11-01 01:30:00",
+      Local_Timezone: "America/Los_Angeles",
+      Timestamp_UTC: "2026-11-01T09:30:00.456Z",
+      Timestamp_Eastern: "2026-11-01 04:30:00",
+      From: "Kin",
+      Text: "Two\n\nparagraphs",
+      Reaction: "N/A",
+      ID: "k2"
+    }
+  ]);
+});
+
+test("rejects a record whose time is not integer epoch milliseconds", () => {
+  const notMs = [undefined, Number.NaN, 1.5, "1793500000000", "2026-11-01T09:30:00Z", new Date("2026-11-01T09:30:00Z")];
+  for (const instantMs of notMs) {
+    const record = { id: "k", instantMs, from: "Me", text: "", reaction: "N/A" };
+    assert.throws(() => recordsToRows([record], "UTC"), /invalid message time/i, String(instantMs));
+  }
+});
+
+test("rejects a missing time zone instead of writing a blank Local_Timezone", () => {
+  assert.throws(() => recordsToRows([], undefined), /missing time zone/i);
 });
 
 test("builds a header-only CSV when the study window has no messages", () => {

@@ -21,28 +21,51 @@ export function messagesToRows(historyEvent, timeZone = Intl.DateTimeFormat().re
   const payload = historyEvent?.payload ?? {};
   const messages = Array.isArray(payload.messages) ? payload.messages : [];
   const reactions = reactionsByMessageId(payload.message_reactions);
-  const rows = [];
-  const localFormatter = createTimestampFormatter(timeZone);
+  const records = [];
 
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     const message = messages[index];
-    const date = new Date(message.meta.timestamp);
-    if (Number.isNaN(date.getTime())) {
+    const instantMs = new Date(message.meta.timestamp).getTime();
+    if (Number.isNaN(instantMs)) {
       throw new Error(`Invalid message timestamp: ${message.meta.timestamp}`);
     }
-    rows.push({
+    records.push({
+      id: message.id,
+      instantMs,
+      from: message.meta.nature === "Robot" ? "Rep" : "Me",
+      text: String(message.content?.text ?? ""),
+      reaction: reactions.get(message.id) ?? "None"
+    });
+  }
+
+  return recordsToRows(records, timeZone);
+}
+
+// A record is { id, instantMs, from, text, reaction }, with instantMs in integer
+// epoch milliseconds. Rows keep the records' order (each platform sends newest
+// first). Every platform goes through here, so the time columns follow one rule.
+export function recordsToRows(records, timeZone) {
+  if (typeof timeZone !== "string") {
+    throw new Error("Missing time zone.");
+  }
+  const localFormatter = createTimestampFormatter(timeZone);
+
+  return records.map(({ id, instantMs, from, text, reaction }) => {
+    if (!Number.isInteger(instantMs)) {
+      throw new Error(`Invalid message time: ${instantMs}`);
+    }
+    const date = new Date(instantMs);
+    return {
       Timestamp_Local: formatTimestamp(date, localFormatter),
       Local_Timezone: timeZone,
       Timestamp_UTC: date.toISOString(),
       Timestamp_Eastern: formatTimestamp(date, easternFormatter),
-      From: message.meta.nature === "Robot" ? "Rep" : "Me",
-      Text: String(message.content?.text ?? ""),
-      Reaction: reactions.get(message.id) ?? "None",
-      ID: message.id
-    });
-  }
-
-  return rows;
+      From: from,
+      Text: text,
+      Reaction: reaction,
+      ID: id
+    };
+  });
 }
 
 export function buildCsv(rows) {
