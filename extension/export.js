@@ -1,5 +1,6 @@
 import { buildCsv, normalizeParticipantFilename } from "./csvWriter.js";
-import { getReplikaInitMessage } from "./sessionBridge.js";
+import { parseKindroidChatUrl } from "./kindroidClient.js";
+import { getReplikaInitMessage, isReplikaTabUrl } from "./sessionBridge.js";
 import { createStudyWindow } from "./studyWindow.js";
 import { exportHistory } from "./v17Client.js";
 
@@ -10,6 +11,12 @@ const toDateInput = document.querySelector("#to-date");
 const exportButton = document.querySelector("#export-button");
 const statusText = document.querySelector("#status");
 const progressText = document.querySelector("#progress");
+const chatText = document.querySelector("#chat");
+const kindroidKey = document.querySelector("#kindroid-key");
+
+// The tab the popup was opened on decides the platform; activeTab exposes its URL.
+const openedTab = readOpenedTab();
+openedTab.then(showPlatform);
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -54,6 +61,26 @@ form.addEventListener("submit", async (event) => {
     setWorking(false);
   }
 });
+
+// Never rejects: a failed lookup counts as an unsupported page.
+async function readOpenedTab() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true }).catch(() => []);
+  if (isReplikaTabUrl(tab?.url)) return { platform: "replika" };
+  const aiId = parseKindroidChatUrl(tab?.url);
+  if (aiId) return { platform: "kindroid", aiId, title: tab.title ?? "" };
+  return { platform: null };
+}
+
+function showPlatform({ platform, title }) {
+  if (platform === "kindroid") {
+    chatText.textContent = title ? `Kindroid chat: ${title}` : "Kindroid chat detected.";
+    chatText.hidden = false;
+    kindroidKey.hidden = false;
+  } else if (!platform) {
+    setWorking(true);
+    showError("Open Replika or a one-to-one Kindroid chat in this tab, then click the extension again.");
+  }
+}
 
 function setWorking(isWorking) {
   exportButton.disabled = isWorking;

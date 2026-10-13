@@ -140,6 +140,17 @@ test("extension UI uses participant-friendly wording", async () => {
   assert.doesNotMatch(html, /\bPID\b/);
 });
 
+test("the Kindroid key field is hidden by default, masked and never autofilled", async () => {
+  const html = await readFile("extension/export.html", "utf8");
+
+  assert.match(html, /<p id="chat" class="hint" hidden><\/p>/);
+  assert.match(html, /<div id="kindroid-key" hidden>/);
+  assert.match(html, /<input id="api-key"[^>]*type="password"[^>]*autocomplete="off"/);
+  // A hidden required input would block every Replika submit.
+  assert.doesNotMatch(html, /<input id="api-key"[^>]*required/);
+  assert.match(html, /Your key is never saved and is cleared when the export ends\./);
+});
+
 test("extension UI requires From and To dates and submits one study window", async () => {
   const html = await readFile("extension/export.html", "utf8");
   const script = await readFile("extension/export.js", "utf8");
