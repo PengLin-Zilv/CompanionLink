@@ -41,6 +41,12 @@ test("golden Kindroid export downloads exactly the pinned bytes and clears the k
     "Exporting Kindroid chat history. Keep this window open until the file downloads; clicking outside it stops the export.");
   assert.deepEqual(result.disabledDuringExport, [true, true, true, true, true]);
   assert.deepEqual(result.disabled, enabled);
+  // The Kindroid popup can be taller than Chrome allows (less at higher zoom), so every
+  // update scrolls the status into view, ending on the final message.
+  assert.ok(result.reveals.every((reveal) => reveal.options?.block === "nearest"));
+  assert.ok(result.reveals.some((reveal) => reveal.status.startsWith("Exporting Kindroid chat history.")));
+  assert.ok(result.reveals.some((reveal) => reveal.progress === "6 messages"));
+  assert.equal(result.reveals.at(-1).status, "Downloaded P040.csv (chat with B)");
   // The trimmed key travels only in the header; the window starts the walk.
   assert.deepEqual(result.requests, [
     { origin: ENDPOINT, params: { ai_id: "AI1", limit: "1" }, auth: "Bearer kn_fixturekey" },
@@ -57,6 +63,7 @@ test("a Kindroid error downloads nothing, shows the error and still clears the k
   assert.equal(result.bytes, null);
   assert.equal(result.tone, "error");
   assert.match(result.status, /did not accept this API key/);
+  assert.match(result.reveals.at(-1).status, /did not accept this API key/);
   assert.equal(result.progress, "");
   assert.equal(result.keyAfter, "");
   assert.deepEqual(result.disabled, enabled);
@@ -68,6 +75,7 @@ test("after a 429, a second submit in the same popup waits out the window and sa
   assert.equal(result.status, "Downloaded P040.csv (chat with B)");
   assert.deepEqual(result.sends.map((send) => send.at), [0, 31000, 31000]);
   assert.equal(result.sends[1].progress, "0 messages so far. Waiting 31 s (Kindroid allows 10 requests every 30 seconds).");
+  assert.ok(result.reveals.some((reveal) => reveal.progress === result.sends[1].progress));
 });
 
 test("a missing or malformed key is rejected before any request and kept for correction", () => {
@@ -77,6 +85,7 @@ test("a missing or malformed key is rejected before any request and kept for cor
     assert.equal(result.bytes, null, scenario);
     assert.equal(result.tone, "error", scenario);
     assert.match(result.status, /starts with kn_/, scenario);
+    assert.match(result.reveals.at(-1)?.status ?? "", /starts with kn_/, scenario);
     assert.deepEqual(result.requests, [], scenario);
     assert.equal(result.keyAfter, key, scenario);
     assert.deepEqual(result.disabled, enabled, scenario);

@@ -21,6 +21,8 @@ const apiKey = keys[scenario] ?? "  kn_fixturekey  ";
 let submit;
 let downloadedBlob;
 let filename;
+// Each scroll into view records what the participant would be reading at that moment.
+const reveals = [];
 const elements = new Map([
   ["#participant-id", { value: "040" }],
   ["#from-date", { value: "2026-09-29" }],
@@ -28,10 +30,13 @@ const elements = new Map([
   ["#api-key", { value: apiKey }],
   ["#export-button", {}],
   ["#status", { dataset: {} }],
-  ["#progress", {}],
-  ["#chat", { hidden: true }],
+  ["#progress", {
+    scrollIntoView(options) {
+      reveals.push({ options, status: elements.get("#status").textContent, progress: this.textContent });
+    }
+  }],
   ["#kindroid-key", { hidden: true }],
-  ["#export-form", { addEventListener(_event, listener) { submit = listener; } }]
+  ["#export-form", { addEventListener(_event, listener) { submit = listener; }, dataset: {} }]
 ]);
 globalThis.document = {
   querySelector: (selector) => elements.get(selector),
@@ -43,13 +48,13 @@ globalThis.document = {
 };
 URL.createObjectURL = (blob) => { downloadedBlob = blob; return "blob:test"; };
 URL.revokeObjectURL = () => {};
-// Any later lookup sees another chat: the export must stay with the one named at open.
+// Any later lookup sees another chat: the export must stay with the one open when the popup opened.
 let tabQueries = 0;
 globalThis.chrome = {
   tabs: {
     query: async () => [tabQueries++ === 0
-      ? { id: 1, url: "https://kindroid.ai/v2/chat/AI1", title: "Kin B" }
-      : { id: 1, url: "https://kindroid.ai/v2/chat/AI2", title: "Kin C" }]
+      ? { id: 1, url: "https://kindroid.ai/v2/chat/AI1" }
+      : { id: 1, url: "https://kindroid.ai/v2/chat/AI2" }]
   }
 };
 
@@ -105,6 +110,7 @@ if (scenario === "retry429") {
 console.log(JSON.stringify({
   firstStatus,
   sends,
+  reveals,
   filename,
   bytes: downloadedBlob ? Buffer.from(await downloadedBlob.arrayBuffer()).toString("base64") : null,
   status: element("#status").textContent,

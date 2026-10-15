@@ -14,6 +14,7 @@ for (const scenario of ["close", "malformed"]) {
     assert.equal(result.tone, "error");
     assert.match(result.status, /try again/i);
     assert.equal(result.progress, "");
+    assert.equal(result.reveals, 0);
     assert.deepEqual(result.disabled, [false, false, false, false]);
   });
 }
@@ -28,6 +29,7 @@ test("popup repeat-only page finishes with exactly the two original messages", (
   assert.equal(result.tone, "info");
   assert.equal(result.status, "Downloaded P040.csv");
   assert.equal(result.progress, "2 messages exported");
+  assert.equal(result.reveals, 0);
   assert.deepEqual(result.disabled, [false, false, false, false]);
   const rows = result.csv.trimEnd().split("\r\n").slice(1).map((line) => line.split(","));
   assert.deepEqual(rows.map((row) => row.at(-1)), ["late", "midday"]);
@@ -49,6 +51,7 @@ for (const [timeZone, ids, firstRow] of [
     assert.equal(result.filename, "P040.csv");
     assert.equal(result.status, "Downloaded P040.csv");
     assert.equal(result.progress, "3 messages exported");
+    assert.equal(result.reveals, 0);
     const lines = result.csv.trimEnd().split("\r\n");
     assert.equal(lines[0], "Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID");
     assert.equal(lines[1], firstRow);

@@ -41,16 +41,27 @@
         line-height: 1.35;
       }
 
-      .hint + label {
+      .dates,
+      .dates > div + div {
         margin-top: 12px;
       }
 
-      input + label {
-        margin-top: 12px;
+      /* Kindroid's key field makes the popup taller, so its dates share one row and
+         its gaps are tighter, keeping a waiting export within Chrome's 600 px. */
+      form[data-platform="kindroid"] .dates {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 8px;
       }
 
-      #chat {
-        margin: 0 0 12px;
+      form[data-platform="kindroid"] #kindroid-key {
+        margin-top: 8px;
+      }
+
+      form[data-platform="kindroid"] .dates > div {
+        min-width: 0;
+        margin-top: 0;
       }
 
       #kindroid-key {
@@ -117,15 +128,20 @@
   <body>
     <main>
       <h1>CompanionLink</h1>
-      <p id="chat" class="hint" hidden></p>
       <form id="export-form">
         <label for="participant-id">Participant ID</label>
         <input id="participant-id" name="participant-id" autocomplete="off" placeholder="Example: 040" aria-describedby="pid-hint" required>
         <p id="pid-hint" class="hint">Enter the participant ID, for example 040. The file will download as P040.csv.</p>
-        <label for="from-date">From date</label>
-        <input id="from-date" name="from-date" type="date" required>
-        <label for="to-date">To date</label>
-        <input id="to-date" name="to-date" type="date" required>
+        <div class="dates">
+          <div>
+            <label for="from-date">From date</label>
+            <input id="from-date" name="from-date" type="date" required>
+          </div>
+          <div>
+            <label for="to-date">To date</label>
+            <input id="to-date" name="to-date" type="date" required>
+          </div>
+        </div>
         <div id="kindroid-key" hidden>
           <label for="api-key">Kindroid API key</label>
           <input id="api-key" name="api-key" type="password" autocomplete="off" aria-describedby="key-hint key-privacy">

@@ -16,7 +16,8 @@ const elements = new Map([
   ["#api-key", { value: "" }],
   ["#export-button", {}],
   ["#status", { dataset: {} }],
-  ["#progress", {}],
+  // Replika never scrolls the status into view (the reveal is Kindroid-only).
+  ["#progress", { reveals: 0, scrollIntoView() { this.reveals += 1; } }],
   ["#export-form", { addEventListener(_event, listener) { submit = listener; } }]
 ]);
 globalThis.document = {
@@ -90,5 +91,6 @@ console.log(JSON.stringify({
   tone: elements.get("#status").dataset.tone,
   disabled: ["#participant-id", "#from-date", "#to-date", "#export-button"]
     .map((selector) => elements.get(selector).disabled),
-  progress: elements.get("#progress").textContent
+  progress: elements.get("#progress").textContent,
+  reveals: elements.get("#progress").reveals
 }));

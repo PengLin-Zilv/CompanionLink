@@ -12,7 +12,6 @@ const apiKeyInput = document.querySelector("#api-key");
 const exportButton = document.querySelector("#export-button");
 const statusText = document.querySelector("#status");
 const progressText = document.querySelector("#progress");
-const chatText = document.querySelector("#chat");
 const kindroidKey = document.querySelector("#kindroid-key");
 
 // The tab the popup was opened on decides the platform; activeTab exposes its URL.
@@ -42,6 +41,7 @@ form.addEventListener("submit", async (event) => {
     }
   } catch (error) {
     showError(error.message);
+    if (isKindroid) revealStatus();
     return;
   }
 
@@ -49,7 +49,7 @@ form.addEventListener("submit", async (event) => {
   progressText.textContent = "";
 
   try {
-    // The chat named when the popup opened is the one exported.
+    // The chat open in the tab when the popup opened is the one exported.
     const { rows, chatName } = await (isKindroid
       ? exportKindroid(apiKey, opened.aiId, studyWindow)
       : exportReplika(studyWindow));
@@ -60,9 +60,12 @@ form.addEventListener("submit", async (event) => {
   } catch (error) {
     showError(error.message);
   } finally {
-    // The key is never stored; it leaves the field once an export attempt ends.
-    if (isKindroid) apiKeyInput.value = "";
     setWorking(false);
+    if (isKindroid) {
+      // The key is never stored; it leaves the field once an export attempt ends.
+      apiKeyInput.value = "";
+      revealStatus();
+    }
   }
 });
 
@@ -77,14 +80,20 @@ async function exportReplika(studyWindow) {
 // popup closes it, so say both.
 async function exportKindroid(apiKey, aiId, studyWindow) {
   showStatus("Exporting Kindroid chat history. Keep this window open until the file downloads; clicking outside it stops the export.");
+  revealStatus();
   let count = 0;
   const { records, companionName } = await exportKindroidHistory({
     apiKey,
     aiId,
     studyWindow,
-    onProgress: (n) => { count = n; showProgress(n); },
+    onProgress: (n) => {
+      count = n;
+      showProgress(n);
+      revealStatus();
+    },
     onWait: (ms) => {
       progressText.textContent = `${count} messages so far. Waiting ${Math.ceil(ms / 1000)} s (Kindroid allows 10 requests every 30 seconds).`;
+      revealStatus();
     }
   });
   return { rows: recordsToRows(records, studyWindow.timeZone), chatName: companionName };
@@ -94,19 +103,24 @@ function showProgress(count) {
   progressText.textContent = `${count} messages`;
 }
 
+// The Kindroid popup can be taller than Chrome allows (600 px, less at page zoom), so
+// keep the status and progress lines, the last in the popup, in view as they change.
+function revealStatus() {
+  progressText.scrollIntoView({ block: "nearest" });
+}
+
 // Never rejects: a failed lookup counts as an unsupported page.
 async function readOpenedTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true }).catch(() => []);
   if (isReplikaTabUrl(tab?.url)) return { platform: "replika" };
   const aiId = parseKindroidChatUrl(tab?.url);
-  if (aiId) return { platform: "kindroid", aiId, title: tab.title ?? "" };
+  if (aiId) return { platform: "kindroid", aiId };
   return { platform: null };
 }
 
-function showPlatform({ platform, title }) {
+function showPlatform({ platform }) {
   if (platform === "kindroid") {
-    chatText.textContent = title ? `Kindroid chat: ${title}` : "Kindroid chat detected.";
-    chatText.hidden = false;
+    form.dataset.platform = "kindroid";
     kindroidKey.hidden = false;
   } else if (!platform) {
     setWorking(true);

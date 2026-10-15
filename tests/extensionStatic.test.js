@@ -143,12 +143,25 @@ test("extension UI uses participant-friendly wording", async () => {
 test("the Kindroid key field is hidden by default, masked and never autofilled", async () => {
   const html = await readFile("extension/export.html", "utf8");
 
-  assert.match(html, /<p id="chat" class="hint" hidden><\/p>/);
+  // Kindroid tab titles are generic, so the popup no longer shows one.
+  assert.doesNotMatch(html, /id="chat"/);
   assert.match(html, /<div id="kindroid-key" hidden>/);
   assert.match(html, /<input id="api-key"[^>]*type="password"[^>]*autocomplete="off"/);
   // A hidden required input would block every Replika submit.
   assert.doesNotMatch(html, /<input id="api-key"[^>]*required/);
   assert.match(html, /Your key is never saved and is cleared when the export ends\./);
+});
+
+test("the dates share a row only on Kindroid, so Replika keeps its stacked layout", async () => {
+  const html = await readFile("extension/export.html", "utf8");
+
+  assert.match(html, /<div class="dates">\s*<div>\s*<label for="from-date">[\s\S]*?<\/div>\s*<div>\s*<label for="to-date">[\s\S]*?<\/div>\s*<\/div>/);
+  assert.match(html, /form\[data-platform="kindroid"\] \.dates \{[^}]*grid-template-columns: 1fr 1fr;/);
+  // Unscoped, the dates stay stacked: no grid outside the Kindroid rule.
+  assert.doesNotMatch(html, /\n\s*\.dates[^{]*\{[^}]*display:\s*grid/);
+  const order = ["participant-id", "from-date", "to-date", "api-key", "export-button"].map((id) => html.indexOf(`id="${id}"`));
+  assert.ok(order.every((index) => index >= 0));
+  assert.deepEqual([...order].sort((a, b) => a - b), order);
 });
 
 test("extension UI requires From and To dates and submits one study window", async () => {
