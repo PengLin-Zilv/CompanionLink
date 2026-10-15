@@ -22,7 +22,7 @@ function mockServer(messages, { status = 200, body } = {}) {
   const calls = [];
   const fetchImpl = async (url, init) => {
     const u = new URL(url);
-    calls.push({ params: Object.fromEntries(u.searchParams), auth: init.headers.Authorization });
+    calls.push({ params: Object.fromEntries(u.searchParams), auth: init.headers.Authorization, cache: init.cache });
     if (status !== 200) return new Response("Error", { status });
     if (body !== undefined) return new Response(body, { status: 200 });
     const limit = Number(u.searchParams.get("limit"));
@@ -98,6 +98,13 @@ test("starts at the window, not at the oldest message", async () => {
   assert.deepEqual(server.calls[0].params, { ai_id: "AI1", limit: "1" });
   assert.equal(server.calls[1].params.start_after_timestamp, String(studyWindow.startMs - 1));
   assert.ok(server.calls.every((c) => c.auth === "Bearer kn_test"));
+});
+
+test("never reads or fills the browser's HTTP cache, so chat text stays off disk", async () => {
+  const server = mockServer(chat);
+  await run(server);
+  assert.ok(server.calls.length > 1);
+  assert.ok(server.calls.every((c) => c.cache === "no-store"));
 });
 
 test("keeps messages that share a millisecond across a page edge", async () => {

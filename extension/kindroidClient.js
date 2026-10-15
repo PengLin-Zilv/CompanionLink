@@ -147,6 +147,10 @@ async function requestPage(fetchImpl, apiKey, params) {
   try {
     response = await fetchImpl(url, {
       headers: { Authorization: `Bearer ${apiKey}` },
+      // Kindroid sends an ETag but no Cache-Control, so Chrome kept each page of chat
+      // history in its disk cache and revalidated it (HTTP 304, live October 15).
+      // no-store keeps chat text off disk and every page straight from Kindroid.
+      cache: "no-store",
       signal: AbortSignal.timeout(RESPONSE_TIMEOUT_MS)
     });
   } catch (error) {
