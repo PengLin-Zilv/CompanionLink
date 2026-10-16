@@ -149,7 +149,8 @@ test("the Kindroid key field is hidden by default, masked and never autofilled",
   assert.match(html, /<input id="api-key"[^>]*type="password"[^>]*autocomplete="off"/);
   // A hidden required input would block every Replika submit.
   assert.doesNotMatch(html, /<input id="api-key"[^>]*required/);
-  assert.match(html, /Your key is never saved and is cleared when the export ends\./);
+  // Wording approved by Dr. Banks, October 16, 2026.
+  assert.match(html, />Used only to download your chat history from Kindroid\. Your API key is never saved and is cleared when the export ends\.</);
 });
 
 test("the dates share a row only on Kindroid, so Replika keeps its stacked layout", async () => {
