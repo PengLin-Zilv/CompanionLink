@@ -44,7 +44,7 @@ Submit the downloaded chat log file using the method provided by the research te
 
 ### The extension asks you to open Replika
 
-Make sure the active tab's address is my.replika.com (not replika.com), confirm that you are signed in, and try again without switching tabs.
+Make sure the active tab's address is my.replika.com (not replika.com), confirm that you are signed in, then click the extension again.
 
 ### The Replika session was not captured
 

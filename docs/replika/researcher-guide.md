@@ -1,6 +1,6 @@
 # Researcher Guide
 
-> Draft for the expected Chrome Web Store release. This version supports Replika and downloads the chat log to the participant's computer.
+> This guide covers Replika; see the [Kindroid researcher guide](../kindroid/researcher-guide.md) for Kindroid. The extension downloads the chat log to the participant's computer.
 
 ## Before Each Participant Session
 
@@ -66,6 +66,10 @@ was at the time. Agree on how the study handles travel or changed time-zone sett
 Use UTC to distinguish repeated clock times when daylight saving time ends.
 
 ## Troubleshooting
+
+### "Open Replika or a one-to-one Kindroid chat in this tab, then click the extension again."
+
+The extension shows this when it is opened on any other page. Open my.replika.com (not replika.com), sign in, then click the extension again.
 
 ### "Open Replika in the active tab before exporting."
 

@@ -1,26 +1,28 @@
 # CompanionLink
 
-CompanionLink is a LinkLab HCI research tool at Syracuse University for exporting participant-authorized chat history from supported AI companion web apps into a consistent CSV format. Replika is the only app supported today; each newly supported app is named in that version's update notes.
+CompanionLink is a LinkLab HCI research tool at Syracuse University for exporting participant-authorized chat history from supported AI companion web apps into a consistent CSV format. It supports Replika and Kindroid; each newly supported app is named in that version's update notes.
 
-The current release candidate supports Replika. It replaces a manual workflow involving browser developer tools, configuration files, Python, and file renaming with a participant-facing Chrome extension.
+It replaces a manual workflow involving browser developer tools, configuration files, Python, and file renaming with a participant-facing Chrome extension.
 
 ## Current Support
 
 | Platform | Status | Exported data |
 | --- | --- | --- |
-| Replika Web | Release candidate | Text messages and reactions |
+| Replika Web | Released (0.1.0) | Text messages and reactions |
+| Kindroid Web | Release candidate (0.2.0) | Text messages of one-to-one chats; Kindroid's API returns no reactions |
 
-Images, voice messages, diary entries, memories, analytics, and profile data are not exported.
+Images, voice messages, diary entries, memories, analytics, and profile data are not exported. An image-only message keeps its row with empty Text.
 
 Additional AI companion platforms will be evaluated and implemented as platform-specific connectors.
 
 ## Participant Workflow
 
 ```text
-Open my.replika.com and sign in
+Sign in, then open my.replika.com or a one-to-one Kindroid chat
 -> Open CompanionLink
 -> Enter the assigned Participant ID
 -> Select the From date and To date
+-> Kindroid only: paste the participant's own Kindroid API key
 -> Click Export Chat Log
 -> Download P<Participant ID>.csv
 ```
@@ -73,6 +75,8 @@ The remaining Replika mapping preserves the existing backup behavior:
 - missing reactions use `None`;
 - rows are ordered newest to oldest.
 
+Kindroid uses the same columns and order: participant messages use `Me` and the Kin's use `Kin`; Reaction is `N/A`, because Kindroid's API returns no reactions (`None` would claim none was given). Rows whose Text starts with `<<ERROR>>` are Kindroid server-error replies stored in the chat history (observed, not documented), not the Kin's words.
+
 Line breaks inside a message stay real line breaks, in a quoted cell, as standard CSV requires. Excel, pandas and R read such a message as one cell; tools that read the file line by line see one message across several lines. Version 0.1.0 and the legacy backup script wrote them as the two characters `\n`.
 
 An export with no messages in the selected range produces a header-only CSV.
@@ -81,7 +85,7 @@ This eight-column format replaces the previous five-column CSV. Analysis scripts
 
 ## Export Failures
 
-The exporter stops with an error if the connection closes unexpectedly, a
+The Replika exporter stops with an error if the connection closes unexpectedly, a
 connection or export-response wait reaches 30 seconds, or history responses are
 malformed. Repeated message IDs are skipped; an empty page or a page containing
 no new IDs ends the export. The timeout applies
@@ -92,14 +96,26 @@ Failed exports do not download a partial CSV. The form becomes available again
 so the user can retry from the beginning; automatic retry and resume are not
 implemented. Keep the popup open until the export completes.
 
+The Kindroid exporter stops with an error on an HTTP error, a network failure, a
+request that takes over 60 seconds, a chat with no messages, a malformed or
+out-of-order page, or a page with no new messages. Kindroid allows 10 requests per
+30 seconds and 600 per day per account, and sends no retry hint, so before each
+request the extension waits until the request nine back ended over 31 seconds ago;
+exports of more than about 800 messages in the selected dates pause about 30 seconds
+after every 9 requests. An
+HTTP 429 shows "Kindroid is limiting requests..." and makes the next attempt in the
+same popup wait out the window. Responses are fetched with `cache: "no-store"`, so
+Chrome does not cache chat text.
+
 ## Privacy Boundary
 
-The extension uses the participant's active Replika web session locally in Chrome to request their chat history.
+The extension uses the participant's active Replika web session, or the Kindroid API key the participant pastes, locally in Chrome to request their chat history.
 
 The extension does not:
 
 - ask for or store a Replika password;
 - persist Replika authentication or session values;
+- store the Kindroid API key; it is cleared from the form when each export ends;
 - write authentication tokens, device IDs, account IDs, chat IDs, email addresses, or profile data to the CSV;
 - transmit the exported chat log to LinkLab or another server.
 
@@ -120,9 +136,14 @@ access: the manifest still declares a content script on the chat site to capture
 the session at page load. Export connects to `wss://ws.replika.ai/v17` only after
 submission; the WebSocket endpoint is not a supported browser tab.
 
+Kindroid adds no permission. `activeTab` exposes the chat's address, which contains
+the chat ID, and Kindroid's API (`https://api.kindroid.ai/v1/get-chat-messages`)
+accepts requests from the extension page without host permissions. No script runs
+on Kindroid's pages.
+
 ## Release Status
 
-Version `0.1.0` is released and unlisted in Chrome Store.
+Version `0.1.0` (Replika) is released and unlisted in Chrome Store. Version `0.2.0` (Kindroid) is in preparation.
 
 For local development and testing:
 
@@ -168,7 +189,12 @@ Replika:
 - [Researcher Guide](docs/replika/researcher-guide.md)
 - [Visual Workflow and Automation](docs/replika/replika-visual-workflow.md)
 
-The user guides are drafts for the planned Chrome Web Store release. For current local testing, follow the unpacked installation steps above.
+Kindroid:
+
+- [Participant Instructions](docs/kindroid/participant-guide.md)
+- [Researcher Guide](docs/kindroid/researcher-guide.md)
+
+The Replika guides describe the released version; the Kindroid guides are drafts for version 0.2.0. For local testing, follow the unpacked installation steps above.
 
 ## Development
 
@@ -187,11 +213,13 @@ The tests cover:
 - local date boundaries, fractional UTC offsets, and daylight-saving changes;
 - UTC, local, and Eastern timestamp conversion;
 - Replika v17 event sequencing and history pagination;
+- Kindroid paging, validation, error messages, request pacing and cache mode;
 - study-window filtering;
 - extension files, permissions, and participant-facing copy;
-- popup submission through CSV download with simulated browser/network boundaries in multiple time zones.
+- platform detection when the popup opens;
+- popup submission through CSV download with simulated browser/network boundaries in multiple time zones, with byte-exact golden files for Replika and Kindroid.
 
-A complete release check also requires a manual export from an authenticated Replika web account.
+A complete release check also requires manual exports from an authenticated Replika web account and a Kindroid account.
 
 ## Project Structure
 
@@ -199,4 +227,5 @@ A complete release check also requires a manual export from an authenticated Rep
 extension/     Chrome extension source
 tests/         Automated tests
 docs/replika/  Replika guides and visual workflow
+docs/kindroid/ Kindroid guides
 ```
