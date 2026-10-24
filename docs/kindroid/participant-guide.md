@@ -1,6 +1,6 @@
 # Participant Instructions: Kindroid
 
-> Draft for distribution with the planned Chrome Web Store release (version 0.2.0).
+> This guide covers Kindroid; see the [Replika](../replika/participant-guide.md) and [Claude](../claude/participant-guide.md) instructions for those apps.
 
 Use these steps to export the Kindroid chat log requested by the research team.
 

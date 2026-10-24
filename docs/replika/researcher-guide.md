@@ -1,6 +1,6 @@
 # Researcher Guide
 
-> This guide covers Replika; see the [Kindroid researcher guide](../kindroid/researcher-guide.md) for Kindroid. The extension downloads the chat log to the participant's computer.
+> This guide covers Replika; see the [Kindroid](../kindroid/researcher-guide.md) and [Claude](../claude/researcher-guide.md) researcher guides for those apps. The extension downloads the chat log to the participant's computer.
 
 ## Before Each Participant Session
 

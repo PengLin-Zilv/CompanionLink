@@ -1,6 +1,6 @@
 # CompanionLink
 
-CompanionLink is a LinkLab HCI research tool at Syracuse University for exporting participant-authorized chat history from supported AI companion web apps into a consistent CSV format. It supports Replika and Kindroid; each newly supported app is named in that version's update notes.
+CompanionLink is a LinkLab HCI research tool at Syracuse University for exporting participant-authorized chat history from supported AI companion web apps into a consistent CSV format. It supports Replika, Kindroid and Claude; each newly supported app is named in that version's update notes.
 
 It replaces a manual workflow involving browser developer tools, configuration files, Python, and file renaming with a participant-facing Chrome extension.
 
@@ -9,22 +9,24 @@ It replaces a manual workflow involving browser developer tools, configuration f
 | Platform | Status | Exported data |
 | --- | --- | --- |
 | Replika Web | Released (0.1.0) | Text messages and reactions |
-| Kindroid Web | Release candidate (0.2.0) | Text messages of one-to-one chats; Kindroid's API returns no reactions |
+| Kindroid Web | Released (0.2.0) | Text messages of one-to-one chats; Kindroid's API returns no reactions |
+| Claude (claude.ai) | Release candidate (0.3.0) | Text of the chat open in the tab, the versions shown on screen; thumbs up/down ratings are not exported |
 
-Images, voice messages, diary entries, memories, analytics, and profile data are not exported. An image-only message keeps its row with empty Text.
+Images, voice messages, diary entries, memories, analytics, and profile data are not exported. An image-only message keeps its row with empty Text. For Claude, attachments, artifacts, web searches and other tool use, citation links and Claude's thinking are not exported.
 
 Additional AI companion platforms will be evaluated and implemented as platform-specific connectors.
 
 ## Participant Workflow
 
 ```text
-Sign in, then open my.replika.com or a one-to-one Kindroid chat
+Sign in, then open my.replika.com, a one-to-one Kindroid chat or a Claude chat
 -> Open CompanionLink
 -> Enter the assigned Participant ID
 -> Select the From date and To date
 -> Kindroid only: paste the participant's own Kindroid API key
 -> Click Export Chat Log
 -> Download P<Participant ID>.csv
+-> Claude only: repeat for each chat used during the dates
 ```
 
 The extension does not require the participant to open developer tools, install Python, edit configuration files, or rename the downloaded file.
@@ -77,6 +79,8 @@ The remaining Replika mapping preserves the existing backup behavior:
 
 Kindroid uses the same columns and order: participant messages use `Me` and the Kin's use `Kin`; Reaction is `N/A`, because Kindroid's API returns no reactions (`None` would claim none was given). Rows whose Text starts with `<<ERROR>>` are Kindroid server-error replies stored in the chat history (observed, not documented), not the Kin's words.
 
+Claude also uses the same columns and order: participant messages use `Me` and Claude's use `Claude`; Reaction is `N/A`; ID is the message's ID in Claude. One file holds one chat, the chat open in the tab, and only the versions shown on screen: older versions left by edits and regenerated replies are not exported. Text is the message's text blocks as written: adjacent blocks (a cited sentence split across blocks) join directly, and text resuming after any other block, such as a tool call, starts a new paragraph. A reply's time is when Claude finished it.
+
 Line breaks inside a message stay real line breaks, in a quoted cell, as standard CSV requires. Excel, pandas and R read such a message as one cell; tools that read the file line by line see one message across several lines. Version 0.1.0 and the legacy backup script wrote them as the two characters `\n`.
 
 An export with no messages in the selected range produces a header-only CSV.
@@ -107,9 +111,25 @@ HTTP 429 shows "Kindroid is limiting requests..." and makes the next attempt in 
 same popup wait out the window. Responses are fetched with `cache: "no-store"`, so
 Chrome does not cache chat text.
 
+The Claude exporter reads claude.ai's own web API, which is undocumented. It asks
+for the account's organizations, then for the chat in each organization in turn,
+treating a 4xx other than 401 and 429 as the chat not being in that organization.
+It stops with an error on a 401 (signed out; also a 403 on the organization list),
+a 429, a 5xx, a network failure, a request that takes over 60 seconds, a response
+that is not JSON or not in the expected shape, a chat no organization has, a broken
+or looping branch, or a message without a time zone.
+
+It also stops when a message hangs below the visible branch's last message, because
+exporting would drop the participant's newest message. This was seen live while
+Claude was still replying; it is expected, not yet tested, after a failed or
+interrupted reply. A reply ended with Claude's Stop button is exported as far as it
+got. The time of every message on the visible branch is checked; ID, sender and
+content are checked only for messages in the selected dates. Responses are fetched
+with `cache: "no-store"`.
+
 ## Privacy Boundary
 
-The extension uses the participant's active Replika web session, or the Kindroid API key the participant pastes, locally in Chrome to request their chat history.
+The extension uses the participant's active Replika web session, the Kindroid API key the participant pastes, or the Claude sign-in already in their browser, locally in Chrome to request their chat history. For Claude, requests run inside the participant's claude.ai tab, so the browser attaches the sign-in; the extension never reads it.
 
 The extension does not:
 
@@ -124,8 +144,8 @@ The only output is a CSV downloaded to the participant's computer.
 ### Browser Permissions
 
 Automatic session capture and access to the page bridge are limited to
-`https://my.replika.com/*`, the supported Replika chat site. The extension rejects
-other sites before injecting scripts or requesting a session.
+`https://my.replika.com/*`, the supported Replika chat site. The Replika export
+rejects other sites before injecting its content script or requesting a session.
 
 - `activeTab` permits reading the active tab's URL when the extension is opened.
 - `scripting`, together with that temporary access, lets the popup ensure its
@@ -141,9 +161,14 @@ the chat ID, and Kindroid's API (`https://api.kindroid.ai/v1/get-chat-messages`)
 accepts requests from the extension page without host permissions. No script runs
 on Kindroid's pages.
 
+Claude adds no permission either. On a Claude chat, the temporary access that
+`activeTab` grants when the extension is opened lets `scripting` run the request
+function in that tab, in the extension's isolated world, only after **Export Chat
+Log** is clicked. No script runs on claude.ai at page load.
+
 ## Release Status
 
-Version `0.1.0` (Replika) is released and unlisted in Chrome Store. Version `0.2.0` (Kindroid) is in preparation.
+CompanionLink is published, unlisted, on the Chrome Web Store. Replika support shipped in `0.1.0` and Kindroid in `0.2.0`; `0.2.1` only rewords the Kindroid privacy note. Version `0.3.0` (Claude) is in preparation.
 
 For local development and testing:
 
@@ -170,7 +195,7 @@ While the major version is `0`, the CSV schema is not frozen, and a breaking cha
 | `0.1.0` | First unlisted Chrome Web Store upload |
 | `0.1.x` | Fixes after an upload, however small |
 | `0.2.0` | Kindroid connector, keeping the eight-column CSV; message line breaks stay real line breaks; UTF-8 with a byte order mark |
-| `0.3.0` | The next platform after Kindroid (ChatGPT, Gemini or Claude), once its feasibility check passes |
+| `0.3.0` | Claude connector: the chat open in the tab, same eight-column CSV |
 | later `0.x.0` | Each further platform, feature or CSV column change |
 | `1.0.0` | CSV schema frozen for a running study |
 
@@ -194,7 +219,12 @@ Kindroid:
 - [Participant Instructions](docs/kindroid/participant-guide.md)
 - [Researcher Guide](docs/kindroid/researcher-guide.md)
 
-The Replika guides describe the released version; the Kindroid guides are drafts for version 0.2.0. For local testing, follow the unpacked installation steps above.
+Claude:
+
+- [Participant Instructions](docs/claude/participant-guide.md)
+- [Researcher Guide](docs/claude/researcher-guide.md)
+
+The Replika and Kindroid guides describe the released versions; the Claude guides are drafts for version 0.3.0. For local testing, follow the unpacked installation steps above.
 
 ## Development
 
@@ -216,12 +246,13 @@ The tests cover:
 - UTC, local, and Eastern timestamp conversion;
 - Replika v17 event sequencing and history pagination;
 - Kindroid paging, validation, error messages, request pacing and cache mode;
+- Claude chat-page matching, organization lookup, the visible branch, validation, text joining, error messages and the in-tab request;
 - study-window filtering;
 - extension files, permissions, and participant-facing copy;
 - platform detection when the popup opens;
-- popup submission through CSV download with simulated browser/network boundaries in multiple time zones, with byte-exact golden files for Replika and Kindroid.
+- popup submission through CSV download with simulated browser/network boundaries in multiple time zones, with byte-exact golden files for Replika, Kindroid and Claude.
 
-A complete release check also requires manual exports from an authenticated Replika web account and a Kindroid account.
+A complete release check also requires manual exports from an authenticated Replika web account, a Kindroid account and a Claude account.
 
 ## Project Structure
 
@@ -230,4 +261,5 @@ extension/     Chrome extension source
 tests/         Automated tests
 docs/replika/  Replika guides and visual workflow
 docs/kindroid/ Kindroid guides
+docs/claude/   Claude guides
 ```
