@@ -48,7 +48,7 @@ Kindroid also allows 600 requests per account per day, shared with other apps th
 
 | Message | What to do |
 | --- | --- |
-| "Open Replika or a one-to-one Kindroid chat in this tab..." | Open the one-to-one chat with the Kin (not a group chat) and reopen the extension. |
+| "Open Replika, a one-to-one Kindroid chat or a Claude chat in this tab..." | Open the one-to-one chat with the Kin (not a group chat) and reopen the extension. |
 | "Paste your Kindroid API key. It starts with kn_." | Clear the key box and paste the key again, without spaces. |
 | "Kindroid did not accept this API key..." | Copy the current key; a regenerated key replaces the old one. |
 | "No messages found for this Kindroid chat..." | Check that the right chat is open. |

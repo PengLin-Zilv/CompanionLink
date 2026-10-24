@@ -67,7 +67,7 @@ Use UTC to distinguish repeated clock times when daylight saving time ends.
 
 ## Troubleshooting
 
-### "Open Replika or a one-to-one Kindroid chat in this tab, then click the extension again."
+### "Open Replika, a one-to-one Kindroid chat or a Claude chat in this tab, then click the extension again."
 
 The extension shows this when it is opened on any other page. Open my.replika.com (not replika.com), sign in, then click the extension again.
 

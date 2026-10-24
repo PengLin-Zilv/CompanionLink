@@ -113,6 +113,7 @@ test("extension UI and bridge files are present", async () => {
   const requiredFiles = [
     "extension/export.html",
     "extension/export.js",
+    "extension/claudeClient.js",
     "extension/sessionBridge.js",
     "extension/contentScript.js",
     "extension/pageBridge.js",

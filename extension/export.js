@@ -1,3 +1,4 @@
+import { exportClaudeConversation, parseClaudeChatUrl } from "./claudeClient.js";
 import { buildCsv, normalizeParticipantFilename, recordsToRows } from "./csvWriter.js";
 import { exportKindroidHistory, parseKindroidChatUrl } from "./kindroidClient.js";
 import { getReplikaInitMessage, isReplikaTabUrl } from "./sessionBridge.js";
@@ -52,7 +53,9 @@ form.addEventListener("submit", async (event) => {
     // The chat open in the tab when the popup opened is the one exported.
     const { rows, chatName } = await (isKindroid
       ? exportKindroid(apiKey, opened.aiId, studyWindow)
-      : exportReplika(studyWindow));
+      : opened.platform === "claude"
+        ? exportClaude(opened, studyWindow)
+        : exportReplika(studyWindow));
 
     downloadText(filename, buildCsv(rows));
     showStatus(`Downloaded ${filename}${chatName ? ` (chat with ${chatName})` : ""}`);
@@ -99,6 +102,13 @@ async function exportKindroid(apiKey, aiId, studyWindow) {
   return { rows: recordsToRows(records, studyWindow.timeZone), chatName: companionName };
 }
 
+// A few requests and no paging, so there is no progress to show.
+async function exportClaude({ tabId, conversationId }, studyWindow) {
+  showStatus("Exporting Claude chat history. Keep this window open until the file downloads.");
+  const records = await exportClaudeConversation({ tabId, conversationId, studyWindow });
+  return { rows: recordsToRows(records, studyWindow.timeZone) };
+}
+
 function showProgress(count) {
   progressText.textContent = `${count} messages`;
 }
@@ -115,6 +125,8 @@ async function readOpenedTab() {
   if (isReplikaTabUrl(tab?.url)) return { platform: "replika" };
   const aiId = parseKindroidChatUrl(tab?.url);
   if (aiId) return { platform: "kindroid", aiId };
+  const conversationId = parseClaudeChatUrl(tab?.url);
+  if (conversationId) return { platform: "claude", tabId: tab.id, conversationId };
   return { platform: null };
 }
 
@@ -124,7 +136,7 @@ function showPlatform({ platform }) {
     kindroidKey.hidden = false;
   } else if (!platform) {
     setWorking(true);
-    showError("Open Replika or a one-to-one Kindroid chat in this tab, then click the extension again.");
+    showError("Open Replika, a one-to-one Kindroid chat or a Claude chat in this tab, then click the extension again.");
   }
 }
 

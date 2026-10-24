@@ -24,13 +24,23 @@ test("a one-to-one Kindroid chat shows the key field and marks the form for Kind
   });
 });
 
+test("a Claude chat shows the form exactly as on Replika", () => {
+  assert.deepEqual(openPopup("https://claude.ai/chat/3f2a9c1e-7b4d-4e8f-9a6b-1c2d3e4f5a6b"), {
+    keyHidden: true, platform: "", status: "", tone: "", disabled: enabled
+  });
+});
+
 test("any other page says what to open and disables the form", () => {
-  for (const url of ["https://example.com/", "https://kindroid.ai/v2/chat/group/abc", "https://kindroid.ai/home", "", "--query-fails"]) {
+  for (const url of [
+    "https://example.com/", "https://kindroid.ai/v2/chat/group/abc", "https://kindroid.ai/home",
+    "https://claude.ai/new", "https://claude.ai/project/3f2a9c1e-7b4d-4e8f-9a6b-1c2d3e4f5a6b",
+    "https://claude.ai/chat/not-a-uuid", "", "--query-fails"
+  ]) {
     const popup = openPopup(url);
     assert.equal(popup.keyHidden, true, url);
     assert.equal(popup.platform, "", url);
     assert.equal(popup.tone, "error", url);
-    assert.match(popup.status, /Open Replika or a one-to-one Kindroid chat/, url);
+    assert.match(popup.status, /Open Replika, a one-to-one Kindroid chat or a Claude chat in this tab/, url);
     assert.deepEqual(popup.disabled, [true, true, true, true], url);
   }
 });
