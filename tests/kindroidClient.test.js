@@ -13,7 +13,7 @@ const studyWindow = createStudyWindow({
 const at = (iso) => Date.parse(iso);
 
 function message(id, iso, sender = "ai", text = `text ${id}`) {
-  return { id, timestamp: at(iso), sender, display_name: sender === "ai" ? "B" : "Peng", message: text };
+  return { id, timestamp: at(iso), sender, display_name: sender === "ai" ? "B" : "Participant", message: text };
 }
 
 // Behaves like the live API (checked 2026-09-30): start_after_timestamp is strictly
