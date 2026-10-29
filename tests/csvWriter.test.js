@@ -20,7 +20,7 @@ test("rejects empty or unsafe participant IDs", () => {
   assert.throws(() => normalizeParticipantFilename("../040"), /participant id/i);
 });
 
-test("maps v17 history messages to current lab CSV rows newest-to-oldest", () => {
+test("maps v17 history messages to CSV rows newest-to-oldest", () => {
   const history = {
     payload: {
       message_reactions: [
