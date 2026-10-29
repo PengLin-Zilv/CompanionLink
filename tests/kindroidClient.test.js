@@ -239,7 +239,7 @@ test("a 429 fills the window, so a retry in the same popup waits it out", async 
 });
 
 test("only one-to-one v2 chat pages are accepted", () => {
-  assert.equal(parseKindroidChatUrl("https://kindroid.ai/v2/chat/he0zRn7aAZrKQzeW06o4/"), "he0zRn7aAZrKQzeW06o4");
+  assert.equal(parseKindroidChatUrl("https://kindroid.ai/v2/chat/exampleCompanion/"), "exampleCompanion");
   assert.equal(parseKindroidChatUrl("https://kindroid.ai/v2/chat/group/abc"), null);
   assert.equal(parseKindroidChatUrl("https://kindroid.ai/v2/chat/room/abc"), null);
   assert.equal(parseKindroidChatUrl("https://kindroid.ai/chat/abc"), null);
