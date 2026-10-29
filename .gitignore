@@ -4,5 +4,22 @@ docs/superpowers/
 /CONTEXT.md
 /AGENTS.md
 
+# dependencies and test output
+node_modules/
+coverage/
+.nyc_output/
+
+# local secrets
+.env
+.env.local
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*~
+.idea/
+
 # build artifacts - rebuild from extension/ instead of archiving
-/*.zip
+*.zip
