@@ -1,0 +1,30 @@
+# Citation metadata for CompanionLink.
+# TODO: fill the placeholders below. Do not treat the guessed fields as confirmed.
+# Affiliation, ORCID, and the public contact email need the author's confirmation.
+# date-released should be the date of a versioned release the authors want cited.
+# Add a license field only after a LICENSE file exists.
+# Add an identifiers entry (doi) after a Zenodo or other archive DOI exists.
+
+cff-version: 1.2.0
+title: CompanionLink
+message: >-
+  TODO: replace this message once a license and an archive DOI exist.
+  Until a LICENSE file is added, this software is not openly licensed.
+type: software
+authors:
+  - given-names: Peng
+    family-names: Lin
+    # Confirmed as the git author of the existing commits. The fields below are not.
+    email: "TODO: public contact email"
+    affiliation: "TODO: institution and lab, pending confirmation"
+    # orcid: "TODO"
+version: 0.2.1
+# date-released: TODO
+repository-code: "https://github.com/PengLin-Zilv/CompanionLink"
+abstract: >-
+  A Chrome extension that exports a signed-in user's Replika, Kindroid, or
+  Claude chat history, for dates they choose, to a CSV on their own computer.
+keywords:
+  - human-computer interaction
+  - chat logs
+  - browser extension

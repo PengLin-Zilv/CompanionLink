@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Require Node.js 22.6 or newer
+        run: node -e "const [major, minor] = process.versions.node.split('.').map(Number); if (major < 22 || (major === 22 && minor < 6)) { console.error('Node.js >= 22.6 is required, found ' + process.versions.node); process.exit(1); }"
+
+      - name: Run tests
+        run: npm test
+
+      # The Web Store package is the extension directory. There is no compiler.
+      - name: Pack the extension directory
+        run: |
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+
+          root = Path("extension")
+          archive = Path("companionlink-extension.zip")
+          with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as zipped:
+              for path in sorted(root.rglob("*")):
+                  if path.is_file():
+                      zipped.write(path, path.relative_to(root).as_posix())
+          with zipfile.ZipFile(archive) as zipped:
+              names = zipped.namelist()
+          if "manifest.json" not in names:
+              raise SystemExit("manifest.json is not at the zip root")
+          print(f"packed {len(names)} files; manifest.json is at the zip root")
+          PY

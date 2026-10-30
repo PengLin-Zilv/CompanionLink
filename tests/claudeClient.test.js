@@ -318,6 +318,10 @@ test("the fetcher turns each failure into a fixed message", async (t) => {
 
 // The test's own timeout makes a missing request timeout fail instead of hanging.
 test("a request that hangs times out as a read failure", { timeout: 2000 }, async (t) => {
+  // AbortSignal.timeout does not keep the event loop alive. Without a ref'd timer,
+  // Node exits the test before the abort fires and the assertion never runs.
+  const keepAlive = setInterval(() => {}, 1000);
+  t.after(() => clearInterval(keepAlive));
   // The stub shortens the 60 s timeout; the fake fetch fails only when its signal aborts.
   stubTab(t, (_url, init) => new Promise((_resolve, reject) => {
     init.signal.addEventListener("abort", () => reject(init.signal.reason));

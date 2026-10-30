@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security report
+    url: https://github.com/PengLin-Zilv/CompanionLink/security/advisories/new
+    about: Report a vulnerability in private. Do not include chat logs, API keys, or session tokens. See SECURITY.md if this link is not open yet.
