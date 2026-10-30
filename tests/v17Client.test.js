@@ -29,7 +29,7 @@ class FakeWebSocket {
   }
 }
 
-test("mirrors chat_backup.py v17 event order and paginates by last_message_id", async () => {
+test("follows the Replika v17 event order and paginates by last_message_id", async () => {
   FakeWebSocket.instances = [];
 
   const initMessage = JSON.stringify({

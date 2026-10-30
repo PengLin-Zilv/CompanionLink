@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 
 import { getReplikaInitMessage, isReplikaTabUrl } from "../extension/sessionBridge.js";
 
-test("extension manifest exposes only the MVP browser surfaces", async () => {
+test("extension manifest declares only activeTab and scripting, with no host permissions", async () => {
   const manifest = JSON.parse(await readFile("extension/manifest.json", "utf8"));
 
   assert.equal(manifest.manifest_version, 3);
@@ -149,7 +149,7 @@ test("the Kindroid key field is hidden by default, masked and never autofilled",
   assert.match(html, /<input id="api-key"[^>]*type="password"[^>]*autocomplete="off"/);
   // A hidden required input would block every Replika submit.
   assert.doesNotMatch(html, /<input id="api-key"[^>]*required/);
-  // Wording approved by Dr. Banks, October 16, 2026.
+  // Privacy-note wording pinned October 16, 2026.
   assert.match(html, />Used only to download your chat history from Kindroid\. Your API key is never saved and is cleared when the export ends\.</);
 });
 

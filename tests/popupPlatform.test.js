@@ -19,7 +19,7 @@ test("a Replika page shows the form as before, without the key field", () => {
 });
 
 test("a one-to-one Kindroid chat shows the key field and marks the form for Kindroid's layout", () => {
-  assert.deepEqual(openPopup("https://kindroid.ai/v2/chat/he0zRn7aAZrKQzeW06o4"), {
+  assert.deepEqual(openPopup("https://kindroid.ai/v2/chat/exampleCompanion"), {
     keyHidden: false, platform: "kindroid", status: "", tone: "", disabled: enabled
   });
 });

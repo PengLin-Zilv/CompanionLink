@@ -59,7 +59,7 @@ globalThis.chrome = {
 };
 
 const message = (id, iso, sender, text) => ({
-  id, timestamp: Date.parse(iso), sender, display_name: sender === "ai" ? "B" : "Peng",
+  id, timestamp: Date.parse(iso), sender, display_name: sender === "ai" ? "B" : "Participant",
   ...(text === undefined ? { image_urls: ["https://example.invalid/a.jpg"] } : { message: text })
 });
 // The study window, Sep 29 in Los Angeles, is 2026-09-29T07:00Z to 2026-09-30T07:00Z.
