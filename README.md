@@ -26,7 +26,7 @@ Sign in, then open my.replika.com, a one-to-one Kindroid chat or a Claude chat
 -> Kindroid only: paste the participant's own Kindroid API key
 -> Click Export Chat Log
 -> Download P<Participant ID>.csv
--> Claude only: repeat for each chat used during the dates
+-> Claude only: repeat for each chat the participant shares
 ```
 
 The extension does not require the participant to open developer tools, install Python, edit configuration files, or rename the downloaded file.
@@ -120,10 +120,10 @@ that is not JSON or not in the expected shape, a chat no organization has, a bro
 or looping branch, or a message without a time zone.
 
 It also stops when a message hangs below the visible branch's last message, because
-exporting would drop the participant's newest message. This was seen live while
-Claude was still replying; it is expected, not yet tested, after a failed or
-interrupted reply. A reply ended with Claude's Stop button is exported as far as it
-got. The time of every message on the visible branch is checked; ID, sender and
+exporting would drop the participant's newest message. This happens while Claude is
+still replying, and may happen after a failed or interrupted reply; the extension
+cannot tell the two apart. A reply ended with Claude's Stop button is exported as far
+as it got. The time of every message on the visible branch is checked; ID, sender and
 content are checked only for messages in the selected dates. Responses are fetched
 with `cache: "no-store"`.
 

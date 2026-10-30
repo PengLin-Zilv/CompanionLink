@@ -27,14 +27,14 @@ const text = (value, extra) => ({ type: "text", text: value, ...extra });
 const message = (uuid, parent, sender, createdAt, content) => ({
   uuid, parent_message_uuid: parent, sender, created_at: createdAt, content
 });
-// updated_at is not a message time (starring a chat bumps it, live October 13) and the
+// updated_at is not a message time (starring a chat bumps it, as observed) and the
 // export ignores it, so it is set before the window here: filtering on it would fail.
 const conversation = (messages, leaf = messages.at(-1)?.uuid ?? null) => ({
   uuid: ID, name: "Study chat", updated_at: "2026-04-24T13:00:31.715698Z",
   current_leaf_message_uuid: leaf, chat_messages: messages
 });
 
-// Shapes as seen live on October 13: microsecond times, a fixed root, a retried reply
+// Shapes as observed on claude.ai: microsecond times, a fixed root, a retried reply
 // left as a sibling, and tool and platform blocks between the text.
 const MESSAGES = [
   message("april-q", ROOT, "human", "2026-04-24T13:00:28.782890Z", [text("April question")]),
@@ -202,9 +202,9 @@ test("an odd message outside the dates does not block the chat", async () => {
 });
 
 test("a message sent before Claude finished its last reply stops the export", async () => {
-  // As seen live: while Claude replies, the leaf stays on the previous reply and the
+  // As observed: while Claude replies, the leaf stays on the previous reply and the
   // participant's newest message hangs below it, so walking back from the leaf would
-  // drop it. A failed or interrupted reply leaves the same shape.
+  // drop it. A failed or interrupted reply may leave the same shape.
   const replying = conversation([
     ...MESSAGES,
     message("pending", "at-end", "human", "2026-10-14T04:05:00Z", [text("Write an essay")])

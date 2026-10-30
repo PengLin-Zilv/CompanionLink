@@ -17,7 +17,8 @@ Repeat after an extension update or a major Claude website change. CompanionLink
 
 ## One Chat Per File
 
-- The extension exports only the chat open in the tab. Participants who used several chats during the dates export each one. Chrome names the files `P040.csv`, `P040 (1).csv`, `P040 (2).csv`, and so on.
+- The extension exports only the chat open in the tab, so participants share chats one at a time. Claude is a general-purpose assistant, and participants may hold work, health or other private chats. Define in your protocol which Claude chats count (for example, all chats in the dates, or only companion-style chats), and tell participants they may withhold any chat.
+- Participants export each chat they share. Chrome names the files `P040.csv`, `P040 (1).csv`, `P040 (2).csv`, and so on.
 - A file does not say which chat it came from. The participant guide asks participants to submit every file and say how many chats they exported. A missing chat cannot be detected from the files.
 - Message IDs are unique across chats. To combine one participant's files, keep each file's name with its rows (each file is one chat), drop repeated IDs (a chat exported twice) and sort by `Timestamp_UTC`.
 

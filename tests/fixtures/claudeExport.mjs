@@ -87,7 +87,7 @@ const chat = [
   message("c-last-in", "c-lines", "human", "2026-10-14T06:59:59.999Z", [text("Last moment of To")]),
   message("c-at-end", "c-last-in", "assistant", "2026-10-14T07:00:00.000Z", [text("At the end boundary")])
 ];
-// replying: as seen live, the leaf stays on the previous reply and the newest message
+// replying: as observed, the leaf stays on the previous reply and the newest message
 // hangs below it.
 const pending = message("c-pending", "c-at-end", "human", "2026-10-15T11:59:30.000Z", [text("Write an essay")]);
 const conversation = {

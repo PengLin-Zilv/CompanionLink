@@ -28,11 +28,12 @@ remove CompanionLink and install it again from the link.
 
 ## Export Each Chat
 
-CompanionLink exports one chat at a time: the chat open in the tab. **If you used
-more than one Claude chat between your From and To dates, export each one.**
+CompanionLink exports one chat at a time: the chat open in the tab. **Export each chat
+the research team asked you to share.** If you are not sure whether a chat counts,
+ask the team first. You never have to share a chat you do not want to.
 
 1. In Chrome, go to [claude.ai](https://claude.ai) and sign in.
-2. Open a chat you used during your dates. Its address starts with
+2. Open one of the chats you are sharing. Its address starts with
    `claude.ai/chat/`.
 3. If Claude is still replying, wait until it finishes.
 4. Open **CompanionLink**.
@@ -41,7 +42,7 @@ more than one Claude chat between your From and To dates, export each one.**
 7. Click **Export Chat Log**.
 8. Keep the extension window open until it displays
    `Downloaded P<Participant ID>.csv`. This usually takes a few seconds.
-9. Repeat steps 2-8 for every other chat you used during your dates. CompanionLink
+9. Repeat steps 2-8 for each other chat you are sharing. CompanionLink
    shows the same message each time, but Chrome saves the next files as
    `P<Participant ID> (1).csv`, `P<Participant ID> (2).csv`, and so on. Keep all of
    them. If Chrome asks where to save a file, do not replace an earlier one.
@@ -50,8 +51,9 @@ Both selected dates are included and use your computer's time zone automatically
 
 ## Submit The Files
 
-Submit every downloaded file using the method provided by the research team, and
-tell the team how many chats you exported.
+You can open each file before submitting it to see exactly what it contains. Submit
+the files using the method provided by the research team, and tell the team how many
+chats you exported.
 
 ## Troubleshooting
 

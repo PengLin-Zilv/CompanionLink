@@ -1,8 +1,8 @@
 // The chat open in a claude.ai tab, through the site's own undocumented web API:
 // re-test after site changes. Each request runs inside that tab, so the browser attaches
-// the tab's sign-in; CompanionLink never reads it. Facts from the October 13, 2026 live
-// checks: a chat is read through its organization, tree=True returns every branch and
-// the visible branch's leaf, and the first message's parent is a fixed root id.
+// the tab's sign-in; CompanionLink never reads it. Observed behaviour this relies on
+// (October 2026): a chat is read through its organization, tree=True returns every
+// branch and the visible branch's leaf, and the first message's parent is a fixed root id.
 
 const ORIGIN = "https://claude.ai";
 const DETAIL_QUERY = "?tree=True&rendering_mode=messages&render_all_tools=true";
@@ -79,9 +79,9 @@ function visibleBranch({ chat_messages: messages, current_leaf_message_uuid: lea
   if (messages.length === 0) return [];
   if (typeof leaf !== "string") throw claudeError("an incomplete chat");
   // While Claude replies, the leaf still points at the previous reply and the
-  // participant's newest message hangs below it, so the walk would drop it (live,
-  // October 13). A failed or interrupted reply is expected to leave the same shape
-  // (live check L5), so the text covers both.
+  // participant's newest message hangs below it, so the walk would drop it. A failed or
+  // interrupted reply may leave the same shape, and the extension cannot tell the two
+  // apart, so the text covers both.
   if (messages.some((message) => message?.parent_message_uuid === leaf)) {
     throw new Error("Claude has not finished its last reply in this chat. Wait for it to finish, or click Retry in Claude if it stopped, then try again.");
   }
