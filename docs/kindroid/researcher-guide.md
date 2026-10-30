@@ -55,5 +55,5 @@ Kindroid also allows 600 requests per account per day, shared with other apps th
 | "Kindroid is limiting requests..." | Wait a minute, paste the key again and export again. Common after closing the extension mid-export and restarting at once. |
 | "Could not reach Kindroid..." | Check the internet connection and try again. |
 | "Kindroid did not respond in time" or "Kindroid is not responding" | Retry later; record the message if it repeats. |
-| "0 messages exported" | Check the chat and the dates; an empty range gives a header-only file. |
+| "0 messages exported" | Check the chat and the dates; dates with no messages give a file with only the column names. |
 | The extension closed before the download | Export again from the start, with the key pasted again; nothing partial is saved. |

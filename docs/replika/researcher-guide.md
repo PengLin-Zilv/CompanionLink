@@ -57,8 +57,6 @@ Open the file and confirm that it contains the expected date range. A file with 
 - `Timestamp_Eastern`: the corresponding Eastern Time for the team's reference.
 
 The remaining columns are `From,Text,Reaction,ID`. Rows are newest first.
-Update analysis scripts that expect the old five-column CSV: `Timestamp_Eastern`
-replaces the former `Timestamp` column. The legacy Python script has not changed.
 
 All local timestamps use the time zone detected at export, with daylight-saving
 rules applied at each message's date. They do not establish where the participant

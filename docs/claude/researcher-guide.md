@@ -36,7 +36,7 @@ The eight columns, file name, encoding and time columns are the same as for Repl
 Things to know when analyzing:
 
 - **Text only.** Files and images the participant attached, artifacts, web searches and other tool use, citation links, and Claude's thinking are not exported. A message with only an attachment has empty `Text`.
-- **Only the version on screen.** Editing a message or regenerating a reply keeps the older versions in Claude. The file contains only the versions shown on screen at the time of export.
+- **Edited messages and regenerated replies.** Claude keeps the older versions, but the file has only the version the chat currently shows.
 - **Each message counts by its own time.** A chat begun before the From date contributes its messages from inside the dates.
 - **A reply's time is when Claude finished it.** The gap between a `Me` row and the next `Claude` row includes the time Claude took to write.
 - **A reply ended with Claude's Stop button** is exported as far as it got, with no marker.
@@ -55,5 +55,5 @@ A Claude export usually takes a few seconds; it needs no pacing, unlike Kindroid
 | "Claude is limiting requests..." | Wait a few minutes and export again. |
 | "Could not read from Claude..." or "Could not read the Claude tab..." | Check the internet connection, refresh the Claude page and try again. |
 | "Claude returned an unexpected response", "an incomplete chat", "an invalid chat message" or "an error (HTTP ...)" | Retry once. If it repeats, record the exact message: Claude may have changed its website, and the extension may need an update. |
-| "0 messages exported" | Check the chat and the dates; an empty range gives a header-only file. |
+| "0 messages exported" | Check the chat and the dates; dates with no messages give a file with only the column names. |
 | The extension closed before the download | Export again; nothing partial is saved. |

@@ -5,8 +5,8 @@ import { createHash } from "node:crypto";
 
 // Pins the exact bytes the Replika export downloads. Each
 // synthetic message ID names the rule it covers. Changing these bytes changes
-// participants' data: update the golden only on purpose, with the README's
-// Output Format and a new version.
+// participants' data: update the golden only on purpose, with the CSV format in
+// docs/technical-notes.md and a new version.
 function runGolden(fromDate, toDate) {
   const child = spawnSync(process.execPath, ["tests/fixtures/replikaGolden.mjs", fromDate, toDate], {
     encoding: "utf8", env: { ...process.env, TZ: "America/Los_Angeles" }, timeout: 10000
