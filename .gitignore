@@ -1,5 +1,4 @@
-# agent
-docs/superpowers/
+# local
 /docs/local/
 /CONTEXT.md
 /AGENTS.md
@@ -22,4 +21,8 @@ Desktop.ini
 .idea/
 
 # build artifacts - rebuild from extension/ instead of archiving
-*.zip
+/*.zip
+
+# Chrome "Pack extension" output; the .pem is the private signing key
+*.pem
+*.crx

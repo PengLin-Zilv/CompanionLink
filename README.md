@@ -200,6 +200,8 @@ The Replika guides describe the released version; the Kindroid guides are drafts
 
 The extension uses plain JavaScript, HTML, CSS, and Chrome Manifest V3. It has no runtime package dependencies.
 
+Requires Node.js 22.6 or newer.
+
 Run the automated test suite:
 
 ```powershell

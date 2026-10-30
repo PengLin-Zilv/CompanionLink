@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 
 import { getReplikaInitMessage, isReplikaTabUrl } from "../extension/sessionBridge.js";
 
-test("extension manifest exposes only activeTab and scripting", async () => {
+test("extension manifest declares only activeTab and scripting, with no host permissions", async () => {
   const manifest = JSON.parse(await readFile("extension/manifest.json", "utf8"));
 
   assert.equal(manifest.manifest_version, 3);
