@@ -1,6 +1,6 @@
 # Researcher Guide: Claude
 
-> This guide covers Claude; see the [Replika](../replika/researcher-guide.md) and [Kindroid](../kindroid/researcher-guide.md) researcher guides for those apps. Draft for version 0.3.0. The extension reads the chat open in the participant's claude.ai tab, using the sign-in already in their browser, and downloads the CSV to their computer.
+> This guide covers Claude; see the [Replika](../replika/researcher-guide.md) and [Kindroid](../kindroid/researcher-guide.md) researcher guides for those apps. The extension reads the chat open in the participant's claude.ai tab, using the sign-in already in their browser, and downloads the CSV to their computer.
 
 ## Before Each Participant Session
 

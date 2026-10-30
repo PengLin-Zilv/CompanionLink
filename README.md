@@ -14,7 +14,7 @@ Chat apps' own exports, where they exist, rarely suit research: they may cover a
 
 Images, voice messages, attachments and other app data, such as memories or profiles, are not exported. A message that was only an image keeps its row, with empty text.
 
-Replika and Kindroid are in the current Chrome Web Store version (0.2.1). Claude arrives in version 0.3.0.
+Claude support was added in version 0.3.0.
 
 ## Install
 
@@ -71,7 +71,7 @@ See the full [privacy policy](https://penglin-zilv.github.io/companion-chat-log-
 | --- | --- | --- |
 | Replika | [Participant instructions](docs/replika/participant-guide.md) | [Researcher guide](docs/replika/researcher-guide.md) |
 | Kindroid | [Participant instructions](docs/kindroid/participant-guide.md) | [Researcher guide](docs/kindroid/researcher-guide.md) |
-| Claude (draft for 0.3.0) | [Participant instructions](docs/claude/participant-guide.md) | [Researcher guide](docs/claude/researcher-guide.md) |
+| Claude | [Participant instructions](docs/claude/participant-guide.md) | [Researcher guide](docs/claude/researcher-guide.md) |
 
 ## Technical Details
 

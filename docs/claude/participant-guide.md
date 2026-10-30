@@ -1,6 +1,6 @@
 # Participant Instructions: Claude
 
-> This guide covers Claude; see the [Replika](../replika/participant-guide.md) and [Kindroid](../kindroid/participant-guide.md) instructions for those apps. Draft for version 0.3.0.
+> This guide covers Claude; see the [Replika](../replika/participant-guide.md) and [Kindroid](../kindroid/participant-guide.md) instructions for those apps.
 
 Use these steps to export the Claude chats requested by the research team.
 
