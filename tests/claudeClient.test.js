@@ -107,7 +107,7 @@ test("other claude.ai pages, lookalike hosts and other sites are rejected", () =
     `https://claude.ai@example.com/chat/${ID}`,
     `https://example.com/claude.ai/chat/${ID}`,
     "https://my.replika.com/chat",
-    "https://kindroid.ai/v2/chat/he0zRn7aAZrKQzeW06o4",
+    "https://kindroid.ai/v2/chat/exampleCompanion",
     "not a URL",
     undefined
   ]) {
