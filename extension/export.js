@@ -1,3 +1,4 @@
+import { exportChatGptConversation, parseChatGptChatUrl } from "./chatgptClient.js";
 import { exportClaudeConversation, parseClaudeChatUrl } from "./claudeClient.js";
 import { buildCsv, normalizeParticipantFilename, recordsToRows } from "./csvWriter.js";
 import { exportKindroidHistory, parseKindroidChatUrl } from "./kindroidClient.js";
@@ -55,7 +56,9 @@ form.addEventListener("submit", async (event) => {
       ? exportKindroid(apiKey, opened.aiId, studyWindow)
       : opened.platform === "claude"
         ? exportClaude(opened, studyWindow)
-        : exportReplika(studyWindow));
+        : opened.platform === "chatgpt"
+          ? exportChatGpt(opened, studyWindow)
+          : exportReplika(studyWindow));
 
     downloadText(filename, buildCsv(rows));
     showStatus(`Downloaded ${filename}${chatName ? ` (chat with ${chatName})` : ""}`);
@@ -109,6 +112,14 @@ async function exportClaude({ tabId, conversationId }, studyWindow) {
   return { rows: recordsToRows(records, studyWindow.timeZone) };
 }
 
+// One function in the tab pages back to From, which can take a while on a long chat,
+// and clicking outside the popup closes it, so say both.
+async function exportChatGpt({ tabId, conversationId }, studyWindow) {
+  showStatus("Exporting ChatGPT chat history. Keep this window open until the file downloads; clicking outside it stops the export.");
+  const records = await exportChatGptConversation({ tabId, conversationId, studyWindow });
+  return { rows: recordsToRows(records, studyWindow.timeZone) };
+}
+
 function showProgress(count) {
   progressText.textContent = `${count} messages`;
 }
@@ -127,6 +138,8 @@ async function readOpenedTab() {
   if (aiId) return { platform: "kindroid", aiId };
   const conversationId = parseClaudeChatUrl(tab?.url);
   if (conversationId) return { platform: "claude", tabId: tab.id, conversationId };
+  const chatGptId = parseChatGptChatUrl(tab?.url);
+  if (chatGptId) return { platform: "chatgpt", tabId: tab.id, conversationId: chatGptId };
   return { platform: null };
 }
 
@@ -136,7 +149,7 @@ function showPlatform({ platform }) {
     kindroidKey.hidden = false;
   } else if (!platform) {
     setWorking(true);
-    showError("Open Replika, a one-to-one Kindroid chat or a Claude chat in this tab, then click the extension again.");
+    showError("Open Replika, a one-to-one Kindroid chat, a Claude chat or a ChatGPT chat in this tab, then click the extension again.");
   }
 }
 

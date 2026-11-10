@@ -48,7 +48,7 @@ A Claude export usually takes a few seconds; it needs no pacing, unlike Kindroid
 
 | Message | What to do |
 | --- | --- |
-| "Open Replika, a one-to-one Kindroid chat or a Claude chat in this tab..." | Open the chat itself (address `claude.ai/chat/...`), not a new chat, the chat list, a project page or a shared link, and reopen the extension. |
+| "Open Replika, a one-to-one Kindroid chat, a Claude chat or a ChatGPT chat in this tab..." | Open the chat itself (address `claude.ai/chat/...`), not a new chat, the chat list, a project page or a shared link, and reopen the extension. |
 | "Sign in to Claude in this tab, refresh the page, then try again." | Sign in to Claude in the same tab and refresh. |
 | "Claude has not finished its last reply in this chat..." | Wait for the reply to finish. If it stopped with an error, click Retry in Claude, then export again. |
 | "Claude could not find this chat..." | Open the chat from Claude's sidebar. The participant may be signed in to a different account, or the chat was deleted. |
