@@ -497,8 +497,14 @@ test("a chat request that fails, first or older, stops the export at once", asyn
 // The test's own timeout makes a missing request timeout fail instead of hanging.
 test("a request that hangs times out as a read failure", { timeout: 2000 }, async (t) => {
   // The stub shortens the 60 s timeout; the fake fetch fails only when its signal aborts.
+  // A real hung request keeps its connection open; the timer stands in for it, since Node
+  // does not let AbortSignal.timeout keep it running and would exit before the abort.
   const hang = (_url, init) => new Promise((_resolve, reject) => {
-    init.signal.addEventListener("abort", () => reject(init.signal.reason));
+    const connection = setTimeout(() => {}, 2000);
+    init.signal.addEventListener("abort", () => {
+      clearTimeout(connection);
+      reject(init.signal.reason);
+    });
   });
   stubTab(t, { [SESSION_URL]: hang }, { timeoutMs: 5 });
   await assert.rejects(exportChat(), { message: UNREADABLE });
