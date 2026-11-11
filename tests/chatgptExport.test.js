@@ -27,23 +27,23 @@ const SENTINELS = [
 ];
 const leaks = (value) => SENTINELS.filter((sentinel) => String(value).includes(sentinel));
 
-const HEADER = "Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID";
+const HEADER = "Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction";
 const GOLDEN_ROWS = [
-  "2026-10-13 23:59:59,America/Los_Angeles,2026-10-14T06:59:59.999Z,2026-10-14 02:59:59,Me,Last moment of To,N/A,g-last-in",
-  "2026-10-13 09:00:02,America/Los_Angeles,2026-10-13T16:00:02.000Z,2026-10-13 12:00:02,ChatGPT,\"Yes, loud and clear.\",N/A,g-voice-reply",
-  "2026-10-13 09:00:10,America/Los_Angeles,2026-10-13T16:00:10.000Z,2026-10-13 12:00:10,Me,Can you hear me?,N/A,g-voice-user",
-  "2026-10-13 08:30:00,America/Los_Angeles,2026-10-13T15:30:00.000Z,2026-10-13 11:30:00,Me,,N/A,g-image",
-  "2026-10-13 08:00:00,America/Los_Angeles,2026-10-13T15:00:00.000Z,2026-10-13 11:00:00,ChatGPT,\"Two ideas:\n- Walk\n- Read\",N/A,g-lines",
-  "2026-10-13 07:31:00,America/Los_Angeles,2026-10-13T14:31:00.000Z,2026-10-13 10:31:00,ChatGPT,It’s fine — 你好 😊,N/A,g-reply",
-  "2026-10-13 07:31:02,America/Los_Angeles,2026-10-13T14:31:02.250Z,2026-10-13 10:31:02,Me,\"She said \"\"hi\"\", then left\",N/A,g-quote",
-  "2026-10-13 06:00:05,America/Los_Angeles,2026-10-13T13:00:05.123Z,2026-10-13 09:00:05,ChatGPT, Here is what I found.,N/A,g-tools-answer",
-  "2026-10-13 00:00:00,America/Los_Angeles,2026-10-13T07:00:00.000Z,2026-10-13 03:00:00,Me,Good morning,N/A,g-at-start"
+  "2026-10-13 23:59:59,America/Los_Angeles,2026-10-14T06:59:59.999Z,2026-10-14 02:59:59,Me,Last moment of To,N/A",
+  "2026-10-13 09:00:02,America/Los_Angeles,2026-10-13T16:00:02.000Z,2026-10-13 12:00:02,ChatGPT,\"Yes, loud and clear.\",N/A",
+  "2026-10-13 09:00:10,America/Los_Angeles,2026-10-13T16:00:10.000Z,2026-10-13 12:00:10,Me,Can you hear me?,N/A",
+  "2026-10-13 08:30:00,America/Los_Angeles,2026-10-13T15:30:00.000Z,2026-10-13 11:30:00,Me,,N/A",
+  "2026-10-13 08:00:00,America/Los_Angeles,2026-10-13T15:00:00.000Z,2026-10-13 11:00:00,ChatGPT,\"Two ideas:\n- Walk\n- Read\",N/A",
+  "2026-10-13 07:31:00,America/Los_Angeles,2026-10-13T14:31:00.000Z,2026-10-13 10:31:00,ChatGPT,It’s fine — 你好 😊,N/A",
+  "2026-10-13 07:31:02,America/Los_Angeles,2026-10-13T14:31:02.250Z,2026-10-13 10:31:02,Me,\"She said \"\"hi\"\", then left\",N/A",
+  "2026-10-13 06:00:05,America/Los_Angeles,2026-10-13T13:00:05.123Z,2026-10-13 09:00:05,ChatGPT, Here is what I found.,N/A",
+  "2026-10-13 00:00:00,America/Los_Angeles,2026-10-13T07:00:00.000Z,2026-10-13 03:00:00,Me,Good morning,N/A"
 ];
 
 test("golden ChatGPT export downloads exactly the pinned bytes from the chat open at popup open", () => {
   const result = runChatGpt();
   assert.equal(result.bytes.toString("utf8"), `${BOM}${[HEADER, ...GOLDEN_ROWS].join("\r\n")}\r\n`);
-  assert.equal(sha256(result.bytes), "d26000d410e8558d696d1e43aa94dcd61152dcbf2fdf912868a21af1d14d87e9");
+  assert.equal(sha256(result.bytes), "3b56c65974317d2774e33ca904fdc57b18045f353b62ef289602a74be80ccfca");
   assert.equal(result.filename, "P040.csv");
   assert.equal(result.status, "Downloaded P040.csv");
   assert.equal(result.progress, "9 messages exported");
