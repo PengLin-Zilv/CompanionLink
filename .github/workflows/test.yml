@@ -11,10 +11,12 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
+      fail-fast: false
       matrix:
-        # 22 is the engines floor (>=22.6) and resolves to the newest 22.x; 24 is the current LTS.
-        node-version: [22, 24]
+        # 22 covers the engines floor (>=22.6); 24 is in maintenance; 26 is the active LTS.
+        node-version: [22, 24, 26]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
