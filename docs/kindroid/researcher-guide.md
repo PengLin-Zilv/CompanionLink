@@ -23,7 +23,7 @@ Repeat after an extension update or a major Kindroid change.
 
 ## What The CSV Contains
 
-The eight columns, file name, encoding and time columns are the same as for Replika. Kindroid differs in two columns:
+The seven columns, file name, encoding and time columns are the same as for Replika. Kindroid differs in two columns:
 
 | Column | Kindroid value |
 | --- | --- |
@@ -35,7 +35,7 @@ As for Replika, `Text` is the message as written, line breaks included, and empt
 Things to know when analyzing:
 
 - **Kindroid server errors appear as Kin rows.** Kindroid keeps its own server-error replies in the history as Kin messages whose `Text` starts with `<<ERROR>>` (observed in testing, not documented). They are not the Kin's words and inflate Kin message counts. The team should decide whether to exclude them.
-- **An export is a snapshot.** Tweak and Regenerate replace a message's text but keep its ID and original time, and Rewind deletes messages. The file shows the chat as it was on the day of export; earlier wording cannot be recovered.
+- **An export is a snapshot.** Tweak and Regenerate replace a message's text but keep its original time, and Rewind deletes messages. The file shows the chat as it was on the day of export; earlier wording cannot be recovered.
 - **Only one-to-one chats.** Group chats and Rooms are not supported. A participant with several Kins exports the chat open in the tab. The success message usually names the Kin (from the chat's first message) but can omit it.
 
 ## Export Time

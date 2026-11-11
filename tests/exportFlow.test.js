@@ -32,15 +32,15 @@ test("popup repeat-only page finishes with exactly the two original messages", (
   assert.equal(result.reveals, 0);
   assert.deepEqual(result.disabled, [false, false, false, false]);
   const rows = result.csv.trimEnd().split("\r\n").slice(1).map((line) => line.split(","));
-  assert.deepEqual(rows.map((row) => row.at(-1)), ["late", "midday"]);
+  assert.deepEqual(rows.map((row) => row[2]), ["2026-09-07T23:59:00.000Z", "2026-09-07T12:00:00.000Z"]);
   assert.ok(rows.every((row) => row[1] === "America/Los_Angeles"));
 });
 
-for (const [timeZone, ids, firstRow] of [
-  ["America/Los_Angeles", ["late", "midday", "boundary"],
-    "2026-09-07 16:59:00,America/Los_Angeles,2026-09-07T23:59:00.000Z,2026-09-07 19:59:00,Me,Example,None,late"],
-  ["Asia/Shanghai", ["midday", "boundary", "early"],
-    "2026-09-07 20:00:00,Asia/Shanghai,2026-09-07T12:00:00.000Z,2026-09-07 08:00:00,Me,Example,None,midday"]
+for (const [timeZone, utcTimes, firstRow] of [
+  ["America/Los_Angeles", ["2026-09-07T23:59:00.000Z", "2026-09-07T12:00:00.000Z", "2026-09-07T07:00:00.000Z"],
+    "2026-09-07 16:59:00,America/Los_Angeles,2026-09-07T23:59:00.000Z,2026-09-07 19:59:00,Me,Example,None"],
+  ["Asia/Shanghai", ["2026-09-07T12:00:00.000Z", "2026-09-07T07:00:00.000Z", "2026-09-07T06:59:59.000Z"],
+    "2026-09-07 20:00:00,Asia/Shanghai,2026-09-07T12:00:00.000Z,2026-09-07 08:00:00,Me,Example,None"]
 ]) {
   test(`popup exports local dates and CSV times in ${timeZone}, keeping the zone across batches`, () => {
     const child = spawnSync(process.execPath, ["tests/fixtures/popupExport.mjs"], {
@@ -53,9 +53,9 @@ for (const [timeZone, ids, firstRow] of [
     assert.equal(result.progress, "3 messages exported");
     assert.equal(result.reveals, 0);
     const lines = result.csv.trimEnd().split("\r\n");
-    assert.equal(lines[0], "Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID");
+    assert.equal(lines[0], "Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction");
     assert.equal(lines[1], firstRow);
-    assert.deepEqual(lines.slice(1).map((line) => line.split(",").at(-1)), ids);
+    assert.deepEqual(lines.slice(1).map((line) => line.split(",")[2]), utcTimes);
     assert.ok(lines.slice(1).every((line) => line.split(",")[1] === timeZone));
   });
 }

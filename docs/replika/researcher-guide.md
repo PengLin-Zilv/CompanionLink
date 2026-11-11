@@ -56,7 +56,7 @@ Open the file and confirm that it contains the expected date range. A file with 
 - `Timestamp_UTC`: the precise time reference for matching study prompts and calculating elapsed time.
 - `Timestamp_Eastern`: the corresponding Eastern Time for the team's reference.
 
-The remaining columns are `From,Text,Reaction,ID`. Rows are newest first.
+The remaining columns are `From,Text,Reaction`. Rows are newest first.
 
 All local timestamps use the time zone detected at export, with daylight-saving
 rules applied at each message's date. They do not establish where the participant

@@ -59,8 +59,7 @@ test("maps v17 history messages to CSV rows newest-to-oldest", () => {
       Timestamp_Eastern: "2026-07-08 16:36:40",
       From: "Rep",
       Text: "Hello, \"there\"",
-      Reaction: "Love",
-      ID: "msg-rep-new"
+      Reaction: "Love"
     },
     {
       Timestamp_Local: "2026-07-08 13:36:32",
@@ -69,8 +68,7 @@ test("maps v17 history messages to CSV rows newest-to-oldest", () => {
       Timestamp_Eastern: "2026-07-08 16:36:32",
       From: "Me",
       Text: "Sometimes I think it\nspills over",
-      Reaction: "None",
-      ID: "msg-me-old"
+      Reaction: "None"
     }
   ]);
 });
@@ -84,8 +82,7 @@ test("builds Python csv.writer compatible CSV text", () => {
       Timestamp_Eastern: "2026-07-08 16:36:40",
       From: "Rep",
       Text: "Hello, \"there\"",
-      Reaction: "Love",
-      ID: "msg-rep-new"
+      Reaction: "Love"
     },
     {
       Timestamp_Local: "2026-07-08 13:36:32",
@@ -94,16 +91,15 @@ test("builds Python csv.writer compatible CSV text", () => {
       Timestamp_Eastern: "2026-07-08 16:36:32",
       From: "Me",
       Text: "Sometimes I think it\nspills over",
-      Reaction: "None",
-      ID: "msg-me-old"
+      Reaction: "None"
     }
   ];
 
   assert.equal(
     buildCsv(rows),
-    "\uFEFFTimestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID\r\n" +
-      "2026-07-08 13:36:40,America/Los_Angeles,2026-07-08T20:36:40.000Z,2026-07-08 16:36:40,Rep,\"Hello, \"\"there\"\"\",Love,msg-rep-new\r\n" +
-      "2026-07-08 13:36:32,America/Los_Angeles,2026-07-08T20:36:32.000Z,2026-07-08 16:36:32,Me,\"Sometimes I think it\nspills over\",None,msg-me-old\r\n"
+    "\uFEFFTimestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction\r\n" +
+      "2026-07-08 13:36:40,America/Los_Angeles,2026-07-08T20:36:40.000Z,2026-07-08 16:36:40,Rep,\"Hello, \"\"there\"\"\",Love\r\n" +
+      "2026-07-08 13:36:32,America/Los_Angeles,2026-07-08T20:36:32.000Z,2026-07-08 16:36:32,Me,\"Sometimes I think it\nspills over\",None\r\n"
   );
 });
 
@@ -122,8 +118,7 @@ test("turns platform-neutral records into CSV rows without reordering them", () 
       Timestamp_Eastern: "2026-11-01 03:30:00",
       From: "Me",
       Text: "",
-      Reaction: "N/A",
-      ID: "k1"
+      Reaction: "N/A"
     },
     {
       Timestamp_Local: "2026-11-01 01:30:00",
@@ -132,8 +127,7 @@ test("turns platform-neutral records into CSV rows without reordering them", () 
       Timestamp_Eastern: "2026-11-01 04:30:00",
       From: "Kin",
       Text: "Two\n\nparagraphs",
-      Reaction: "N/A",
-      ID: "k2"
+      Reaction: "N/A"
     }
   ]);
 });
@@ -151,7 +145,7 @@ test("rejects a missing time zone instead of writing a blank Local_Timezone", ()
 });
 
 test("builds a header-only CSV when the study window has no messages", () => {
-  assert.equal(buildCsv([]), "\uFEFFTimestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID\r\n");
+  assert.equal(buildCsv([]), "\uFEFFTimestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction\r\n");
 });
 
 test("uses each message's daylight-saving offset and retains distinct UTC instants", () => {
