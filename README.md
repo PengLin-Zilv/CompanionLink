@@ -77,3 +77,9 @@ See the full [privacy policy](https://penglin-zilv.github.io/companion-chat-log-
 ## Technical Details
 
 How each export works and when it stops, browser permissions, the exact CSV format, development and releases: [docs/technical-notes.md](docs/technical-notes.md).
+
+## License
+
+Copyright (C) 2026 Peng Lin
+
+CompanionLink is licensed under the GNU General Public License, version 3 (GPL-3.0). See [LICENSE](LICENSE).
