@@ -112,7 +112,7 @@ test("follows the Replika v17 event order and paginates by last_message_id", asy
 
   const rows = await exportPromise;
   assert.equal(socket.closeCount, 1);
-  assert.deepEqual(rows.map((row) => row.ID), ["newest-in-batch", "oldest-in-batch"]);
+  assert.deepEqual(rows.map((row) => row.Text), ["new", "old"]);
 });
 
 test("filters to the study window and stops after crossing the start boundary", async () => {
@@ -193,7 +193,7 @@ test("filters to the study window and stops after crossing the start boundary", 
   }
   const rows = await exportPromise;
 
-  assert.deepEqual(rows.map((row) => row.ID), ["inside-window"]);
+  assert.deepEqual(rows.map((row) => row.Text), ["inside"]);
   assert.equal(historyRequests.length, 1);
   assert.equal(socket.closeCount, 1);
 });
