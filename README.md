@@ -1,4 +1,5 @@
 # CompanionLink
+[![Tests](https://github.com/PengLin-Zilv/CompanionLink/actions/workflows/test.yml/badge.svg)](https://github.com/PengLin-Zilv/CompanionLink/actions/workflows/test.yml)
 
 CompanionLink is a Chrome extension for collecting conversation data, with participants' consent, in studies of human–AI interaction. Participants use it to export their own chat history with a conversational AI app, for the dates a study sets, into one consistent CSV format. The export runs entirely in the participant's browser: nothing is sent to the researchers or to any server, and participants share the file through the study's own procedure.
 
