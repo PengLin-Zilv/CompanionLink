@@ -7,9 +7,10 @@ const initMessage = JSON.stringify({
   event_name: "init", payload: {}, token: "fixture",
   auth: { user_id: "10", auth_token: "fixture", device_id: "fixture" }
 });
+// The text repeats the ID, so the tests can tell the rows apart.
 const message = (id) => ({
   id, meta: { timestamp: "2026-09-01T12:00:00Z", nature: "Customer" },
-  content: { text: "Synthetic message" }
+  content: { text: String(id) }
 });
 
 function setup(t, studyWindow) {
@@ -120,7 +121,7 @@ for (const [label, pages, expectedIds, cursors] of [
     socket.emit("history", { messages: [] });
     await Promise.resolve();
     assert.equal(result.state, "resolved");
-    assert.deepEqual(result.rows.map((row) => row.ID), expectedIds);
+    assert.deepEqual(result.rows.map((row) => row.Text), expectedIds);
     assert.deepEqual(socket.sent.map((request) => request.payload.last_message_id), cursors);
     assert.equal(socket.closeCount, 1);
   });
@@ -155,10 +156,10 @@ test("valid multiple batches finish once and ignore late history", async (t) => 
   socket.emit("history", { messages: [] });
   await Promise.resolve();
   assert.equal(result.state, "resolved");
-  assert.deepEqual(result.rows.map((row) => row.ID), ["d", "c", "b", "a"]);
+  assert.deepEqual(result.rows.map((row) => row.Text), ["d", "c", "b", "a"]);
   socket.emit("history", { messages: [message("late")] });
   t.mock.timers.tick(60000);
-  assert.deepEqual(result.rows.map((row) => row.ID), ["d", "c", "b", "a"]);
+  assert.deepEqual(result.rows.map((row) => row.Text), ["d", "c", "b", "a"]);
   assert.equal(socket.closeCount, 1);
   assert.equal(socket.sent.length, 2);
 });
@@ -177,7 +178,7 @@ test("numeric IDs and epoch timestamps preserve values and dedupe string echoes"
   assert.deepEqual(result.rows, [{
     Timestamp_Local: "2026-09-01 05:00:00", Local_Timezone: "America/Los_Angeles",
     Timestamp_UTC: "2026-09-01T12:00:00.000Z", Timestamp_Eastern: "2026-09-01 08:00:00",
-    From: "Me", Text: "Synthetic message", Reaction: "Like", ID: 7
+    From: "Me", Text: "7", Reaction: "Like"
   }]);
 });
 
@@ -200,7 +201,7 @@ for (const [label, data] of [["text keepalive", "ping"], ["binary frame", new Bl
     socket.emit("history", { messages: [] });
     await Promise.resolve();
     assert.equal(result.state, "resolved");
-    assert.deepEqual(result.rows.map((row) => row.ID), ["a"]);
+    assert.deepEqual(result.rows.map((row) => row.Text), ["a"]);
   });
 
   test(`${label} does not reset the response timeout`, async (t) => {

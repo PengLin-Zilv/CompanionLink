@@ -56,7 +56,7 @@ Open the file and confirm that it contains the expected date range. A file with 
 - `Timestamp_UTC`: the precise time reference for matching study prompts and calculating elapsed time.
 - `Timestamp_Eastern`: the corresponding Eastern Time for the team's reference.
 
-The remaining columns are `From,Text,Reaction,ID`. Rows are newest first.
+The remaining columns are `From,Text,Reaction`. Rows are newest first.
 
 All local timestamps use the time zone detected at export, with daylight-saving
 rules applied at each message's date. They do not establish where the participant
@@ -65,7 +65,7 @@ Use UTC to distinguish repeated clock times when daylight saving time ends.
 
 ## Troubleshooting
 
-### "Open Replika, a one-to-one Kindroid chat or a Claude chat in this tab, then click the extension again."
+### "Open Replika, a one-to-one Kindroid chat, a Claude chat or a ChatGPT chat in this tab, then click the extension again."
 
 The extension shows this when it is opened on any other page. Open my.replika.com (not replika.com), sign in, then click the extension again.
 

@@ -27,7 +27,7 @@ p040 -> P040.csv
 The CSV header is:
 
 ```csv
-Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction,ID
+Timestamp_Local,Local_Timezone,Timestamp_UTC,Timestamp_Eastern,From,Text,Reaction
 ```
 
 | Column | Format |
@@ -45,7 +45,7 @@ Replika: Replika messages use `Rep` and participant messages use `Me`; missing r
 
 Kindroid uses the same columns and order: participant messages use `Me` and the Kin's use `Kin`; Reaction is `N/A`, because Kindroid's API returns no reactions (`None` would claim none was given). Rows whose Text starts with `<<ERROR>>` are Kindroid server-error replies stored in the chat history (observed, not documented), not the Kin's words.
 
-Claude also uses the same columns and order: participant messages use `Me` and Claude's use `Claude`; Reaction is `N/A`; ID is the message's ID in Claude. One file holds one chat, the chat open in the tab, and only the versions shown on screen: older versions left by edits and regenerated replies are not exported. Text is the message's text blocks as written: adjacent blocks (a cited sentence split across blocks) join directly, and text resuming after any other block, such as a tool call, starts a new paragraph. A reply's time is when Claude finished it.
+Claude also uses the same columns and order: participant messages use `Me` and Claude's use `Claude`; Reaction is `N/A`. One file holds one chat, the chat open in the tab, and only the versions shown on screen: older versions left by edits and regenerated replies are not exported. Text is the message's text blocks as written: adjacent blocks (a cited sentence split across blocks) join directly, and text resuming after any other block, such as a tool call, starts a new paragraph. A reply's time is when Claude finished it.
 
 ## How Each Export Works And When It Stops
 

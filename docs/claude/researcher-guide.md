@@ -20,18 +20,17 @@ Repeat after an extension update or a major Claude website change. CompanionLink
 - The extension exports only the chat open in the tab, so participants share chats one at a time. Claude is a general-purpose assistant, and participants may hold work, health or other private chats. Define in your protocol which Claude chats count (for example, all chats in the dates, or only companion-style chats), and tell participants they may withhold any chat.
 - Participants export each chat they share. Chrome names the files `P040.csv`, `P040 (1).csv`, `P040 (2).csv`, and so on.
 - A file does not say which chat it came from. The participant guide asks participants to submit every file and say how many chats they exported. A missing chat cannot be detected from the files.
-- Message IDs are unique across chats. To combine one participant's files, keep each file's name with its rows (each file is one chat), drop repeated IDs (a chat exported twice) and sort by `Timestamp_UTC`.
+- To combine one participant's files, keep each file's name with its rows (each file is one chat), drop repeated rows by `Timestamp_UTC` + `From` (a chat exported twice; times are millisecond-precise) and sort by `Timestamp_UTC`.
 
 ## What The CSV Contains
 
-The eight columns, file name, encoding and time columns are the same as for Replika. Claude differs in these columns:
+The seven columns, file name, encoding and time columns are the same as for Replika. Claude differs in these columns:
 
 | Column | Claude value |
 | --- | --- |
 | `From` | `Me` for the participant, `Claude` for Claude |
 | `Text` | The text of the message, line breaks included |
 | `Reaction` | `N/A` for every row: Claude's thumbs up/down ratings are not exported |
-| `ID` | The message's ID in Claude |
 
 Things to know when analyzing:
 
@@ -48,7 +47,7 @@ A Claude export usually takes a few seconds; it needs no pacing, unlike Kindroid
 
 | Message | What to do |
 | --- | --- |
-| "Open Replika, a one-to-one Kindroid chat or a Claude chat in this tab..." | Open the chat itself (address `claude.ai/chat/...`), not a new chat, the chat list, a project page or a shared link, and reopen the extension. |
+| "Open Replika, a one-to-one Kindroid chat, a Claude chat or a ChatGPT chat in this tab..." | Open the chat itself (address `claude.ai/chat/...`), not a new chat, the chat list, a project page or a shared link, and reopen the extension. |
 | "Sign in to Claude in this tab, refresh the page, then try again." | Sign in to Claude in the same tab and refresh. |
 | "Claude has not finished its last reply in this chat..." | Wait for the reply to finish. If it stopped with an error, click Retry in Claude, then export again. |
 | "Claude could not find this chat..." | Open the chat from Claude's sidebar. The participant may be signed in to a different account, or the chat was deleted. |

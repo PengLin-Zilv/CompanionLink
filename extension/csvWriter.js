@@ -1,6 +1,6 @@
 const CSV_COLUMNS = [
   "Timestamp_Local", "Local_Timezone", "Timestamp_UTC", "Timestamp_Eastern",
-  "From", "Text", "Reaction", "ID"
+  "From", "Text", "Reaction"
 ];
 
 const easternFormatter = createTimestampFormatter("America/New_York");
@@ -30,7 +30,6 @@ export function messagesToRows(historyEvent, timeZone = Intl.DateTimeFormat().re
       throw new Error(`Invalid message timestamp: ${message.meta.timestamp}`);
     }
     records.push({
-      id: message.id,
       instantMs,
       from: message.meta.nature === "Robot" ? "Rep" : "Me",
       text: String(message.content?.text ?? ""),
@@ -41,16 +40,17 @@ export function messagesToRows(historyEvent, timeZone = Intl.DateTimeFormat().re
   return recordsToRows(records, timeZone);
 }
 
-// A record is { id, instantMs, from, text, reaction }, with instantMs in integer
-// epoch milliseconds. Rows keep the records' order (each platform sends newest
-// first). Every platform goes through here, so the time columns follow one rule.
+// A record is { instantMs, from, text, reaction }, with instantMs in integer
+// epoch milliseconds; other fields, such as a client's message id, are ignored.
+// Rows keep the records' order (each platform sends newest first). Every platform
+// goes through here, so the time columns follow one rule.
 export function recordsToRows(records, timeZone) {
   if (typeof timeZone !== "string") {
     throw new Error("Missing time zone.");
   }
   const localFormatter = createTimestampFormatter(timeZone);
 
-  return records.map(({ id, instantMs, from, text, reaction }) => {
+  return records.map(({ instantMs, from, text, reaction }) => {
     if (!Number.isInteger(instantMs)) {
       throw new Error(`Invalid message time: ${instantMs}`);
     }
@@ -62,8 +62,7 @@ export function recordsToRows(records, timeZone) {
       Timestamp_Eastern: formatTimestamp(date, easternFormatter),
       From: from,
       Text: text,
-      Reaction: reaction,
-      ID: id
+      Reaction: reaction
     };
   });
 }

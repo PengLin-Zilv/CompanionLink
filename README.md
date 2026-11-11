@@ -36,7 +36,7 @@ Participants install CompanionLink in Google Chrome on a computer, from its [Chr
 
 ## What The File Contains
 
-One row per message, newest first, in eight columns:
+One row per message, newest first, in seven columns:
 
 | Column | Meaning |
 | --- | --- |
@@ -47,7 +47,6 @@ One row per message, newest first, in eight columns:
 | `From` | `Me` for the participant; `Rep`, `Kin` or `Claude` for the companion |
 | `Text` | The message as written, line breaks included |
 | `Reaction` | Replika's reaction, or `None`; `N/A` for Kindroid and Claude (not available) |
-| `ID` | The message's ID in the app |
 
 The file opens correctly in Excel. In R, read it with `fileEncoding = "UTF-8-BOM"`; in Python, open it with `open(path, encoding="utf-8-sig", newline="")`. Dates with no messages give a file with only the column names.
 
