@@ -37,6 +37,12 @@ test("a ChatGPT chat shows the form exactly as on Replika", () => {
   });
 });
 
+test("a Gemini chat shows the form exactly as on Replika", () => {
+  assert.deepEqual(openPopup("https://gemini.google.com/app/0123456789abcdef"), {
+    keyHidden: true, platform: "", status: "", tone: "", disabled: enabled
+  });
+});
+
 test("any other page says what to open and disables the form", () => {
   for (const url of [
     "https://example.com/", "https://kindroid.ai/v2/chat/group/abc", "https://kindroid.ai/home",
@@ -44,13 +50,15 @@ test("any other page says what to open and disables the form", () => {
     "https://claude.ai/chat/not-a-uuid", "https://chatgpt.com/", "https://chatgpt.com/?temporary-chat=true",
     "https://chatgpt.com/share/2b3c4d5e-6f70-4812-9a3b-4c5d6e7f8091", "https://chatgpt.com/g/g-synthetic123-companion",
     "https://chatgpt.com/c/not-a-uuid", "https://chat.openai.com/c/2b3c4d5e-6f70-4812-9a3b-4c5d6e7f8091",
+    "https://gemini.google.com/app", "https://gemini.google.com/gems/view",
+    "https://gemini.google.com/app/not-hex-id-00000", "https://bard.google.com/chat/0123456789abcdef",
     "", "--query-fails"
   ]) {
     const popup = openPopup(url);
     assert.equal(popup.keyHidden, true, url);
     assert.equal(popup.platform, "", url);
     assert.equal(popup.tone, "error", url);
-    assert.match(popup.status, /Open Replika, a one-to-one Kindroid chat, a Claude chat or a ChatGPT chat in this tab/, url);
+    assert.match(popup.status, /a ChatGPT chat or a Gemini chat in this tab/, url);
     assert.deepEqual(popup.disabled, [true, true, true, true], url);
   }
 });

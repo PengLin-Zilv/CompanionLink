@@ -1,6 +1,7 @@
 import { exportChatGptConversation, parseChatGptChatUrl } from "./chatgptClient.js";
 import { exportClaudeConversation, parseClaudeChatUrl } from "./claudeClient.js";
 import { buildCsv, normalizeParticipantFilename, recordsToRows } from "./csvWriter.js";
+import { exportGeminiConversation, parseGeminiChatUrl } from "./geminiClient.js";
 import { exportKindroidHistory, parseKindroidChatUrl } from "./kindroidClient.js";
 import { getReplikaInitMessage, isReplikaTabUrl } from "./sessionBridge.js";
 import { createStudyWindow } from "./studyWindow.js";
@@ -58,7 +59,9 @@ form.addEventListener("submit", async (event) => {
         ? exportClaude(opened, studyWindow)
         : opened.platform === "chatgpt"
           ? exportChatGpt(opened, studyWindow)
-          : exportReplika(studyWindow));
+          : opened.platform === "gemini"
+            ? exportGemini(opened, studyWindow)
+            : exportReplika(studyWindow));
 
     downloadText(filename, buildCsv(rows));
     showStatus(`Downloaded ${filename}${chatName ? ` (chat with ${chatName})` : ""}`);
@@ -120,6 +123,14 @@ async function exportChatGpt({ tabId, conversationId }, studyWindow) {
   return { rows: recordsToRows(records, studyWindow.timeZone) };
 }
 
+// As for ChatGPT, one function in the tab pages back to From, one second between pages,
+// and clicking outside the popup closes it, so say both.
+async function exportGemini({ tabId, chatId, accountPath }, studyWindow) {
+  showStatus("Exporting Gemini chat history. Keep this window open until the file downloads; clicking outside it stops the export.");
+  const records = await exportGeminiConversation({ tabId, chatId, accountPath, studyWindow });
+  return { rows: recordsToRows(records, studyWindow.timeZone) };
+}
+
 function showProgress(count) {
   progressText.textContent = `${count} messages`;
 }
@@ -140,6 +151,8 @@ async function readOpenedTab() {
   if (conversationId) return { platform: "claude", tabId: tab.id, conversationId };
   const chatGptId = parseChatGptChatUrl(tab?.url);
   if (chatGptId) return { platform: "chatgpt", tabId: tab.id, conversationId: chatGptId };
+  const gemini = parseGeminiChatUrl(tab?.url);
+  if (gemini) return { platform: "gemini", tabId: tab.id, ...gemini };
   return { platform: null };
 }
 
@@ -149,7 +162,7 @@ function showPlatform({ platform }) {
     kindroidKey.hidden = false;
   } else if (!platform) {
     setWorking(true);
-    showError("Open Replika, a one-to-one Kindroid chat, a Claude chat or a ChatGPT chat in this tab, then click the extension again.");
+    showError("Open Replika, a one-to-one Kindroid chat, a Claude chat, a ChatGPT chat or a Gemini chat in this tab, then click the extension again.");
   }
 }
 
