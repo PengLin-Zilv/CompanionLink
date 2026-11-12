@@ -324,6 +324,35 @@ test("an older page that repeats the newer one stops instead of looping", { time
   assert.equal(tab.fetches.length, 2);
 });
 
+// Page A holds a turn in the dates above EDGE, with a cursor; page B holds the chat's
+// first turn, before From. Returns how many pages were asked for.
+async function pagesOnFrom(t, edgeMs) {
+  const [newest, edge, oldest] = chain([
+    turn(3, pair("2026-10-13T12:00:00.000Z"), "Hi", "Hello"),
+    turn(2, pair(new Date(edgeMs).toISOString()), "Edge", "Edge reply"),
+    turn(1, pair("2026-10-01T12:00:00.000Z"), "Older", "Old reply")
+  ]);
+  const tab = stubTab(t, { first: payload([newest, edge], "cursor-b"), "cursor-b": payload([oldest], null) });
+  await exportChat();
+  return tab.fetches.length;
+}
+
+test("paging stops once a page's oldest turn is before From", async (t) => {
+  assert.equal(await pagesOnFrom(t, studyWindow.startMs), 2);
+  assert.equal(await pagesOnFrom(t, studyWindow.startMs - 1), 1);
+});
+
+test("a turn timed after the newer one stops the export; equal times pass", async (t) => {
+  // t5 is at 13:00Z; t4 is the newest turn on page B.
+  const later = edited(4, (x) => { x[4] = pair("2026-10-13T13:00:00.001Z"); });
+  for (const routes of [onePage(later), twoPages(later)]) {
+    stubTab(t, routes);
+    await assert.rejects(exportChat(), { message: UNEXPECTED });
+  }
+  stubTab(t, onePage(edited(4, (x) => { x[4] = pair("2026-10-13T13:00:00.000Z"); })));
+  assert.equal((await exportChat()).length, EXPECTED.length);
+});
+
 test("a reply Gemini is still writing in the dates stops the export", async (t) => {
   // Without t9, t8 is the chat's newest turn: a status other than 2, none, or no text yet.
   for (const change of [stopped, withStatus([0]), (x) => { shownDraft(x).length = 8; }, withText("")]) {

@@ -106,8 +106,9 @@ async function readChatInPage(chatId, accountPath, startMs, endMs, timeoutMs) {
           : { error: "http", status };
 
   const records = [];
-  // The turn walked before this one, the next newer turn in the chat.
+  // The turn walked before this one, the next newer turn in the chat, and its time.
   let newer = null;
+  let newerMs;
   let cursor = null;
   while (true) {
     const { status, body } = await post(cursor);
@@ -149,8 +150,11 @@ async function readChatInPage(chatId, accountPath, startMs, endMs, timeoutMs) {
       const instantMs = seconds * 1000 + Math.floor(nanos / 1e6);
       if (!Number.isInteger(seconds) || !Number.isInteger(nanos) || nanos < 0 || nanos >= 1e9 ||
         !(instantMs >= Date.UTC(2020, 0, 1) && instantMs < Date.UTC(2100, 0, 1))) return { error: "invalid" };
+      // The stop at From relies on times that never increase going back.
+      if (newer && instantMs > newerMs) return { error: "unexpected" };
       const newest = newer === null;
       newer = t;
+      newerMs = instantMs;
       if (instantMs < startMs || instantMs >= endMs) continue;
 
       // The other slots are checked in the window only, where they fill the cells. The
@@ -167,6 +171,8 @@ async function readChatInPage(chatId, accountPath, startMs, endMs, timeoutMs) {
       records.push({ instantMs, from: "Gemini", text, reaction: "N/A" }, { instantMs, from: "Me", text: prompt, reaction: "N/A" });
     }
 
+    // The page's oldest turn is before From, so every older one is too.
+    if (newerMs < startMs) return { records };
     // The last page ends at the chat's first turn.
     if (next == null) return newer[1] === null ? { records } : { error: "incomplete" };
     cursor = next;
