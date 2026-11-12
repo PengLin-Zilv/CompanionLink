@@ -13,6 +13,8 @@
 
 // A hung request fails loudly instead of spinning forever.
 const RESPONSE_TIMEOUT_MS = 60000;
+// Spaces the requests out on what is usually the participant's main Google account.
+const PAGE_PAUSE_MS = 1000;
 const TAB_ERROR = "Could not read the Gemini tab. Refresh it, then try again.";
 // The codes readChatInPage returns, in the participant's words; "http" comes with its
 // status instead.
@@ -49,7 +51,7 @@ export async function exportGeminiConversation({ tabId, chatId, accountPath, stu
   const [injection] = await chrome.scripting.executeScript({
     target: { tabId },
     func: readChatInPage,
-    args: [chatId, accountPath, studyWindow.startMs, studyWindow.endMs, RESPONSE_TIMEOUT_MS]
+    args: [chatId, accountPath, studyWindow.startMs, studyWindow.endMs, RESPONSE_TIMEOUT_MS, PAGE_PAUSE_MS]
   }).catch(() => []);
 
   const { records, error, status } = injection?.result ?? {};
@@ -63,7 +65,7 @@ export async function exportGeminiConversation({ tabId, chatId, accountPath, stu
 // not use anything defined outside itself. The token, build label and session id live
 // only in this function: the token goes out only as the at field of each request's body,
 // the other two only in its query.
-async function readChatInPage(chatId, accountPath, startMs, endMs, timeoutMs) {
+async function readChatInPage(chatId, accountPath, startMs, endMs, timeoutMs, pauseMs) {
   // The isolated world cannot see the page's variables, but it can read the text of the
   // page's scripts; an external script's text is empty. Provisional until checked on a
   // live page: if the page writes the values another way, only these patterns change.
@@ -175,6 +177,7 @@ async function readChatInPage(chatId, accountPath, startMs, endMs, timeoutMs) {
     if (newerMs < startMs) return { records };
     // The last page ends at the chat's first turn.
     if (next == null) return newer[1] === null ? { records } : { error: "incomplete" };
+    await new Promise((resolve) => setTimeout(resolve, pauseMs));
     cursor = next;
   }
 }

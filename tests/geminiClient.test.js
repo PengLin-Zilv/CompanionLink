@@ -127,10 +127,11 @@ const PAGE_A = TWO_PAGES.first;
 // the result, which proves it is plain data. The stub records each injection, its raw
 // result and each fetch. A route that is a payload answers 200 with it, a number answers
 // that status, "throw" fails the request, "html" answers 200 with a page that is not
-// batchexecute, and a function answers for itself; anything unrouted answers 500. A test
-// may stub twice, so each restores the globals from before any stub.
+// batchexecute, and a function answers for itself; anything unrouted answers 500. The
+// pause between pages is 0 unless a test sets it. A test may stub twice, so each
+// restores the globals from before any stub.
 const original = { chrome: globalThis.chrome, document: globalThis.document, fetch: globalThis.fetch };
-function stubTab(t, routes, { scripts: pageScripts = scripts(), timeoutMs } = {}) {
+function stubTab(t, routes, { scripts: pageScripts = scripts(), timeoutMs, pauseMs = 0 } = {}) {
   t.after(() => {
     for (const [name, value] of Object.entries(original)) {
       if (value === undefined) delete globalThis[name];
@@ -157,6 +158,7 @@ function stubTab(t, routes, { scripts: pageScripts = scripts(), timeoutMs } = {}
         injections.push(details);
         const args = [...details.args];
         if (timeoutMs !== undefined) args[4] = timeoutMs;
+        args[5] = pauseMs;
         const result = await new Function(`return (${func})`)()(...args);
         results.push(result);
         // Every exit of every test is checked: a page value in a result fails here, and the
@@ -240,11 +242,11 @@ test("an odd turn outside the dates is checked only for its ids, link and time",
   assert.deepEqual(await exportChat(), EXPECTED);
 });
 
-test("one injection in the tab's own world, with only the chat, account path, dates and timeout", async (t) => {
+test("one injection in the tab's own world, with only the chat, account path, dates, timeout and pause", async (t) => {
   const tab = stubTab(t, ONE_PAGE);
   await exportChat();
   // No world: "MAIN", so the page cannot replace fetch; same-origin cookies still go.
-  assert.deepEqual(tab.injections, [{ target: { tabId: 7 }, args: [ID, "", studyWindow.startMs, studyWindow.endMs, 60000] }]);
+  assert.deepEqual(tab.injections, [{ target: { tabId: 7 }, args: [ID, "", studyWindow.startMs, studyWindow.endMs, 60000, 1000] }]);
 });
 
 test("each request is the page's own hNvQHb POST, uncached, with the token only in the body", async (t) => {
@@ -284,6 +286,18 @@ test("two chained pages give the same records as one, the second asked for by cu
   const tab = stubTab(t, TWO_PAGES);
   assert.deepEqual(await exportChat(), EXPECTED);
   assert.deepEqual(tab.fetches.map(({ init }) => fReqArgs(init)[2]), [null, "cursor-b"]);
+});
+
+test("each older page waits the pause after the previous response", async (t) => {
+  const answered = [];
+  const timed = (p) => () => {
+    answered.push(performance.now());
+    return new Response(response(p));
+  };
+  stubTab(t, { first: timed(PAGE_A), "cursor-b": timed(TWO_PAGES["cursor-b"]) }, { pauseMs: 50 });
+  assert.deepEqual(await exportChat(), EXPECTED);
+  assert.equal(answered.length, 2);
+  assert.ok(answered[1] - answered[0] >= 40, `${answered[1] - answered[0]} ms`);
 });
 
 test("paging ends without a cursor only at the chat's first turn", async (t) => {
