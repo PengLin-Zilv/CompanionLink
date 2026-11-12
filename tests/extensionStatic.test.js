@@ -184,3 +184,8 @@ test("extension UI requires From and To dates and submits one study window", asy
   assert.match(script, /toDateInput\.disabled = isWorking/);
   assert.match(script, /exportHistory\(\{[\s\S]*studyWindow,/);
 });
+
+// Releases are packed from extension/, so the package carries its own copy of the license.
+test("the extension package carries an exact copy of the project license", async () => {
+  assert.equal(await readFile("extension/LICENSE", "utf8"), await readFile("LICENSE", "utf8"));
+});

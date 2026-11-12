@@ -82,4 +82,4 @@ How each export works and when it stops, browser permissions, the exact CSV form
 
 Copyright (C) 2026 Peng Lin
 
-CompanionLink is licensed under the GNU General Public License, version 3 (GPL-3.0). See [LICENSE](LICENSE).
+CompanionLink is licensed under the GNU General Public License, version 3 only (GPL-3.0-only). See [LICENSE](LICENSE).
