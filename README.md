@@ -36,7 +36,7 @@ Participants install CompanionLink in Google Chrome on a computer, from its [Chr
 
 ## What The File Contains
 
-One row per message, newest first, in eight columns:
+One row per message, newest first, in seven columns:
 
 | Column | Meaning |
 | --- | --- |
@@ -47,7 +47,6 @@ One row per message, newest first, in eight columns:
 | `From` | `Me` for the participant; `Rep`, `Kin` or `Claude` for the companion |
 | `Text` | The message as written, line breaks included |
 | `Reaction` | Replika's reaction, or `None`; `N/A` for Kindroid and Claude (not available) |
-| `ID` | The message's ID in the app |
 
 The file opens correctly in Excel. In R, read it with `fileEncoding = "UTF-8-BOM"`; in Python, open it with `open(path, encoding="utf-8-sig", newline="")`. Dates with no messages give a file with only the column names.
 
@@ -63,7 +62,7 @@ See the full [privacy policy](https://penglin-zilv.github.io/companion-chat-log-
 
 - **Website changes.** Replika and Claude are read through each app's own website, not an official API, so a website change can stop exports until the extension is updated. The extension then shows an error and saves nothing, never a partial file. Kindroid uses its official API.
 - **Export time.** Kindroid limits how fast data can be requested, so long histories pause and can take several minutes. Participants keep the extension window open until the file downloads.
-- **One Claude chat per file.** Participants choose which Claude chats to share; your protocol should say which chats count.
+- **One Claude chat per file.** Participants choose which Claude chats to share.
 - **Terms and ethics.** Review each app's terms and your ethics board's requirements before using CompanionLink in a study.
 
 ## Guides
