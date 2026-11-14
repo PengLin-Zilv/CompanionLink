@@ -2,7 +2,7 @@
 
 > This guide covers Claude; see the [Replika](../replika/participant-guide.md) and [Kindroid](../kindroid/participant-guide.md) instructions for those apps.
 
-Use these steps to export the Claude chats requested by the research team.
+Use these steps to export the Claude chats you want to share.
 
 ## Before You Start
 
@@ -29,8 +29,7 @@ remove CompanionLink and install it again from the link.
 ## Export Each Chat
 
 CompanionLink exports one chat at a time: the chat open in the tab. **Export each chat
-the research team asked you to share.** If you are not sure whether a chat counts,
-ask the team first. You never have to share a chat you do not want to.
+you want to share.**
 
 1. In Chrome, go to [claude.ai](https://claude.ai) and sign in.
 2. Open one of the chats you are sharing. Its address starts with
@@ -52,8 +51,7 @@ Both selected dates are included and use your computer's time zone automatically
 ## Submit The Files
 
 You can open each file before submitting it to see exactly what it contains. Submit
-the files using the method provided by the research team, and tell the team how many
-chats you exported.
+the files using the method provided by the research team.
 
 ## Troubleshooting
 

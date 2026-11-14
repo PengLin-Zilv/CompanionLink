@@ -61,7 +61,7 @@ See the full [privacy policy](https://penglin-zilv.github.io/companion-chat-log-
 
 - **Website changes.** Replika and Claude are read through each app's own website, not an official API, so a website change can stop exports until the extension is updated. The extension then shows an error and saves nothing, never a partial file. Kindroid uses its official API.
 - **Export time.** Kindroid limits how fast data can be requested, so long histories pause and can take several minutes. Participants keep the extension window open until the file downloads.
-- **One Claude chat per file.** Participants choose which Claude chats to share; your protocol should say which chats count.
+- **One Claude chat per file.** Participants choose which Claude chats to share.
 - **Terms and ethics.** Review each app's terms and your ethics board's requirements before using CompanionLink in a study.
 
 ## Guides
