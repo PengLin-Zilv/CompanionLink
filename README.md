@@ -1,4 +1,5 @@
 # CompanionLink
+[![Tests](https://github.com/PengLin-Zilv/CompanionLink/actions/workflows/test.yml/badge.svg)](https://github.com/PengLin-Zilv/CompanionLink/actions/workflows/test.yml)
 
 CompanionLink is a Chrome extension for collecting conversation data, with participants' consent, in studies of human–AI interaction. Participants use it to export their own chat history with a conversational AI app, for the dates a study sets, into one consistent CSV format. The export runs entirely in the participant's browser: nothing is sent to the researchers or to any server, and participants share the file through the study's own procedure.
 
@@ -61,7 +62,7 @@ See the full [privacy policy](https://penglin-zilv.github.io/companion-chat-log-
 
 - **Website changes.** Replika and Claude are read through each app's own website, not an official API, so a website change can stop exports until the extension is updated. The extension then shows an error and saves nothing, never a partial file. Kindroid uses its official API.
 - **Export time.** Kindroid limits how fast data can be requested, so long histories pause and can take several minutes. Participants keep the extension window open until the file downloads.
-- **One Claude chat per file.** Participants choose which Claude chats to share; your protocol should say which chats count.
+- **One Claude chat per file.** Participants choose which Claude chats to share.
 - **Terms and ethics.** Review each app's terms and your ethics board's requirements before using CompanionLink in a study.
 
 ## Guides
@@ -75,3 +76,9 @@ See the full [privacy policy](https://penglin-zilv.github.io/companion-chat-log-
 ## Technical Details
 
 How each export works and when it stops, browser permissions, the exact CSV format, development and releases: [docs/technical-notes.md](docs/technical-notes.md).
+
+## License
+
+Copyright (C) 2026 Peng Lin
+
+CompanionLink is licensed under the GNU General Public License, version 3 only (GPL-3.0-only). See [LICENSE](LICENSE).
