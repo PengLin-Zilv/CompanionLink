@@ -59,7 +59,7 @@ Submit the downloaded chat log file using the method provided by the research te
 
 ## Troubleshooting
 
-### "Open Replika, a one-to-one Kindroid chat, a Claude chat or a ChatGPT chat in this tab..."
+### "Open Replika, a one-to-one Kindroid chat, a Claude chat, a ChatGPT chat or a Gemini chat in this tab..."
 
 Open the one-to-one chat with your Kin (not a group chat), then click the extension again.
 

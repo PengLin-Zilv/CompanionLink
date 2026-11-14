@@ -115,6 +115,7 @@ test("extension UI and bridge files are present", async () => {
     "extension/export.js",
     "extension/chatgptClient.js",
     "extension/claudeClient.js",
+    "extension/geminiClient.js",
     "extension/sessionBridge.js",
     "extension/contentScript.js",
     "extension/pageBridge.js",
@@ -136,6 +137,16 @@ test("the ChatGPT client never stores, logs or forwards the session", async () =
   // The access token stays inside the injected function; the popup never handles it.
   assert.doesNotMatch(client, /console\.|localStorage|sessionStorage|indexedDB|chrome\.storage|document\.cookie|sessionToken|postMessage|sendMessage|debugger/);
   assert.doesNotMatch(script, /accessToken|Authorization/);
+});
+
+test("the Gemini client never stores, logs or forwards the page token", async () => {
+  const client = await readFile("extension/geminiClient.js", "utf8");
+  const script = await readFile("extension/export.js", "utf8");
+
+  // The page values stay inside the injected function, which reads only the scripts'
+  // text; the popup never handles them.
+  assert.doesNotMatch(client, /console\.|localStorage|sessionStorage|indexedDB|chrome\.storage|document\.cookie|postMessage|sendMessage|debugger|innerHTML|outerHTML|innerText/);
+  assert.doesNotMatch(script, /SNlM0e|cfb2h|FdrFJe|WIZ_global_data/);
 });
 
 test("extension UI uses participant-friendly wording", async () => {
