@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 
 // Pins the exact bytes a Kindroid export downloads through the real popup, against a
-// fake Kindroid API. Each synthetic message ID names the rule it covers.
+// fake Kindroid API. Each synthetic message's ID in the fixture names the rule it covers.
 function runKindroid(scenario = "ok") {
   const child = spawnSync(process.execPath, ["tests/fixtures/kindroidExport.mjs", scenario], {
     encoding: "utf8", env: { ...process.env, TZ: "America/Los_Angeles" }, timeout: 10000

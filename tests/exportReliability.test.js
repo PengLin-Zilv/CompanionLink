@@ -164,7 +164,7 @@ test("valid multiple batches finish once and ignore late history", async (t) => 
   assert.equal(socket.sent.length, 2);
 });
 
-test("numeric IDs and epoch timestamps preserve values and dedupe string echoes", async (t) => {
+test("numeric IDs and epoch timestamps work, and a string echo of a numeric ID is skipped", async (t) => {
   const window = createStudyWindow({ startDate: "2026-09-01", endDate: "2026-09-01",
     timeZone: "America/Los_Angeles", submittedAt: new Date("2026-09-02T12:00:00Z") });
   const { socket, result } = setup(t, window);
