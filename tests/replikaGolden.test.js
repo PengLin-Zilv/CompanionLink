@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 
-// Pins the exact bytes the Replika export downloads. Each
-// synthetic message ID names the rule it covers. Changing these bytes changes
+// Pins the exact bytes the Replika export downloads. Each synthetic
+// message's ID in the fixture names the rule it covers. Changing these bytes changes
 // participants' data: update the golden only on purpose, with the CSV format in
 // docs/technical-notes.md and a new version.
 function runGolden(fromDate, toDate) {

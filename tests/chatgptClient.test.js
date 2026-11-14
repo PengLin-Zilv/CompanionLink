@@ -475,10 +475,11 @@ test("a session that fails or has no access token stops before the chat is asked
 });
 
 test("a chat request that fails, first or older, stops the export at once", async (t) => {
-  for (const [status, text] of [
+  for (const [status, text, olderText = text] of [
     [401, SIGN_IN],
     [403, SIGN_IN],
-    [404, NOT_FOUND],
+    // Only the first request names the chat; an older page's 404 keeps its status.
+    [404, NOT_FOUND, http(404)],
     [422, http(422)],
     [429, RATE_LIMIT],
     [500, http(500)],
@@ -489,7 +490,7 @@ test("a chat request that fails, first or older, stops the export at once", asyn
     await assert.rejects(exportChat(), { message: text }, `first ${status}`);
     assert.deepEqual(urls(tab), [SESSION_URL, firstUrl], `first ${status}`);
     tab = stubTab(t, chat(PAGE_A, { [olderUrl("u-recap")]: status }));
-    await assert.rejects(exportChat(), { message: text }, `older ${status}`);
+    await assert.rejects(exportChat(), { message: olderText }, `older ${status}`);
     assert.deepEqual(urls(tab), [SESSION_URL, firstUrl, olderUrl("u-recap")], `older ${status}`);
   }
 });

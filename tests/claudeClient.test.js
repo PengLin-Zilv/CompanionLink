@@ -319,8 +319,14 @@ test("the fetcher turns each failure into a fixed message", async (t) => {
 // The test's own timeout makes a missing request timeout fail instead of hanging.
 test("a request that hangs times out as a read failure", { timeout: 2000 }, async (t) => {
   // The stub shortens the 60 s timeout; the fake fetch fails only when its signal aborts.
+  // A real hung request keeps its connection open; the timer stands in for it, since Node
+  // does not let AbortSignal.timeout keep it running and would exit before the abort.
   stubTab(t, (_url, init) => new Promise((_resolve, reject) => {
-    init.signal.addEventListener("abort", () => reject(init.signal.reason));
+    const connection = setTimeout(() => {}, 2000);
+    init.signal.addEventListener("abort", () => {
+      clearTimeout(connection);
+      reject(init.signal.reason);
+    });
   }), { timeoutMs: 5 });
   await assert.rejects(claudeTabFetcher(7)("/api/organizations"), /Could not read from Claude\./);
 });

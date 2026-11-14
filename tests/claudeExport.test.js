@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 
 // Pins the exact bytes a Claude export downloads through the real popup, against a
-// fake claude.ai. Each synthetic message ID names the rule it covers.
+// fake claude.ai. Each synthetic message's ID in the fixture names the rule it covers.
 function runClaude(scenario = "ok") {
   const child = spawnSync(process.execPath, ["tests/fixtures/claudeExport.mjs", scenario], {
     encoding: "utf8", env: { ...process.env, TZ: "America/Los_Angeles" }, timeout: 10000

@@ -93,7 +93,9 @@ async function readChatInPage(conversationId, startMs, endMs, timeoutMs) {
   let url = `${chatUrl}?num_turns=100&include_has_versions=true`;
   for (let first = true; ; first = false) {
     const { status, body: page } = await getJson(url, headers);
-    if (status === 404) return { error: "not-found" };
+    // Only the first request names the chat. A 404 on an older page would point to a
+    // changed paging endpoint, so it keeps its status for the research team.
+    if (status === 404 && first) return { error: "not-found" };
     if (status < 200 || status >= 300) return failure(status);
     const messages = page?.messages;
     if (!Array.isArray(messages) || typeof page.page_info?.has_previous_page !== "boolean") return { error: "unexpected" };
