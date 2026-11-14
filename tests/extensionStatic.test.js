@@ -113,6 +113,7 @@ test("extension UI and bridge files are present", async () => {
   const requiredFiles = [
     "extension/export.html",
     "extension/export.js",
+    "extension/chatgptClient.js",
     "extension/claudeClient.js",
     "extension/sessionBridge.js",
     "extension/contentScript.js",
@@ -126,6 +127,15 @@ test("extension UI and bridge files are present", async () => {
     const content = await readFile(file, "utf8");
     assert.ok(content.length > 0, `${file} should not be empty`);
   }
+});
+
+test("the ChatGPT client never stores, logs or forwards the session", async () => {
+  const client = await readFile("extension/chatgptClient.js", "utf8");
+  const script = await readFile("extension/export.js", "utf8");
+
+  // The access token stays inside the injected function; the popup never handles it.
+  assert.doesNotMatch(client, /console\.|localStorage|sessionStorage|indexedDB|chrome\.storage|document\.cookie|sessionToken|postMessage|sendMessage|debugger/);
+  assert.doesNotMatch(script, /accessToken|Authorization/);
 });
 
 test("extension UI uses participant-friendly wording", async () => {
