@@ -1,6 +1,6 @@
 # Participant Instructions: Kindroid
 
-> This guide covers Kindroid; see the [Replika](../replika/participant-guide.md) and [Claude](../claude/participant-guide.md) instructions for those apps.
+> This guide covers Kindroid; see the [Replika](../replika/participant-guide.md), [Claude](../claude/participant-guide.md), [ChatGPT](../chatgpt/participant-guide.md) and [Gemini](../gemini/participant-guide.md) instructions for those apps.
 
 Use these steps to export the Kindroid chat log requested by the research team.
 
