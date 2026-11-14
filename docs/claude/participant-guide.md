@@ -55,7 +55,7 @@ the files using the method provided by the research team.
 
 ## Troubleshooting
 
-### "Open Replika, a one-to-one Kindroid chat, a Claude chat or a ChatGPT chat in this tab..."
+### "Open Replika, a one-to-one Kindroid chat, a Claude chat, a ChatGPT chat or a Gemini chat in this tab..."
 
 Open the chat itself: its address starts with `claude.ai/chat/`. A new chat, the
 list of chats, a project page or a shared link cannot be exported. Then click the
