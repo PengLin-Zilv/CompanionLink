@@ -26,31 +26,19 @@ The seven columns, file name, encoding and time columns are the same as for Repl
 | Column | Gemini value |
 | --- | --- |
 | `From` | `Me` for the participant, `Gemini` for Gemini |
-| `Text` | The text of the message, line breaks included |
-| `Reaction` | `N/A` for every row: Gemini's thumbs up/down ratings are not exported |
+| `Text` | The message as written |
+| `Reaction` | `N/A` for every row |
 
-Things to know when analyzing:
-
-- **A prompt and its reply share one time.** Gemini keeps one time for each prompt and its reply, so both rows have the same timestamps, with the reply directly above its prompt. The time between a prompt and its reply cannot be measured. Whether the time marks the prompt or the finished reply has not been confirmed.
-- **Cards appear as placeholder links.** Product, map, hotel, video, generated-image and similar cards in a reply appear in `Text` as links such as `http://googleusercontent.com/shopping_content/0`. The card's content is not exported.
-- **Text only.** Files and images the participant uploaded are not exported. A prompt with only an upload has empty `Text`.
-- **Regenerated replies.** Gemini keeps other drafts of a reply, but the file has only the draft the chat currently shows.
-- **Each message counts by its own time.** A chat begun before the From date contributes its messages from inside the dates.
-- **Chats with a Gem, or under a second signed-in Google account** (address `gemini.google.com/u/1/...`), export the same way.
-- **Some replies stop the export.** A reply without text, or with a kind of card CompanionLink does not read, stops the export with "Gemini returned a kind of message CompanionLink cannot export yet..." instead of leaving words out.
-
-Gemini export reads 10 prompts and replies per request, one second apart, from the newest back to the From date. A long chat can take a minute or more; the participant keeps the extension window open.
+- **A prompt and its reply share one time.** Both rows have the same timestamps, with the reply directly above its prompt.
+- **Text only.** Uploaded files and images are not exported. Cards in a reply (products, maps, images and similar) appear as placeholder links.
+- **Only the draft on screen.** Regenerated replies keep only the draft the chat shows.
 
 ## Troubleshooting
 
 | Message | What to do |
 | --- | --- |
-| "Open Replika, a one-to-one Kindroid chat, a Claude chat, a ChatGPT chat or a Gemini chat in this tab..." | Open the chat itself from the list of chats, not the Gemini home page, a Gem's page or a shared link, and reopen the extension. |
-| "Sign in to Gemini in this tab, refresh the page, then try again." | Sign in to Gemini in the same tab and refresh. If it repeats after a refresh, record the message: Gemini may have changed its website. |
-| "Gemini has not finished its last reply in this chat..." | Wait for the reply to finish. If it stopped, regenerate it in Gemini, then export again. |
+| "Open Replika, a one-to-one Kindroid chat, a Claude chat, a ChatGPT chat or a Gemini chat in this tab..." | Open the chat itself from the list of chats and reopen the extension. |
+| "Sign in to Gemini in this tab, refresh the page, then try again." | Sign in to Gemini in the same tab and refresh. |
+| "Gemini has not finished its last reply in this chat..." | Wait for the reply to finish, then export again. |
 | "Gemini is limiting requests..." | Wait a few minutes and export again. |
-| "Could not read from Gemini..." or "Could not read the Gemini tab..." | Check the internet connection, refresh the Gemini page and try again. |
-| "Gemini returned a kind of message CompanionLink cannot export yet..." | Record the message and the chat's dates: the extension needs an update for this kind of reply. |
-| "Gemini returned an unexpected response", "an incomplete chat", "an invalid chat message" or "an error (HTTP ...)" | Retry once. If it repeats, record the exact message: Gemini may have changed its website, and the extension may need an update. |
-| "0 messages exported" | Check the chat and the dates; dates with no messages give a file with only the column names. |
-| The extension closed before the download | Export again; nothing partial is saved. |
+| Any other error | Refresh the Gemini page and try once more. If it repeats, record the exact message: the extension may need an update. |

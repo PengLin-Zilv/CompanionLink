@@ -26,32 +26,19 @@ The seven columns, file name, encoding and time columns are the same as for Repl
 | Column | ChatGPT value |
 | --- | --- |
 | `From` | `Me` for the participant, `ChatGPT` for ChatGPT |
-| `Text` | The text of the message, line breaks included; voice messages give their transcript |
-| `Reaction` | `N/A` for every row: ChatGPT's thumbs up/down ratings are not exported |
+| `Text` | The message as written; voice messages give their transcript |
+| `Reaction` | `N/A` for every row |
 
-Things to know when analyzing:
-
-- **Text only.** Images and files, canvas documents, generated images, web searches and other tool use, ChatGPT's reasoning and memory updates are not exported. A participant message with only an attachment has empty `Text`.
-- **Edited messages and regenerated replies.** The file has only the version the chat currently shows.
-- **Each message counts by its own time.** A chat begun before the From date contributes its messages from inside the dates.
-- **Rows follow the chat's order, newest first.** ChatGPT's times can be out of that order by a few seconds; sort by `Timestamp_UTC` if you need strict time order.
-- **A reply's time is the time ChatGPT records for it.** Whether that is when the reply started or finished has not been confirmed, so treat the gap between a `Me` row and the next `ChatGPT` row with care.
-- **Chats with a GPT or inside a project** export the same way.
-- **A new kind of message stops the export.** If ChatGPT shows a kind of message with text that CompanionLink does not know, it stops with "ChatGPT returned a kind of message CompanionLink cannot export yet..." instead of leaving the text out.
-
-ChatGPT export reads 100 messages per request, from the newest back to a day before the From date. A long chat can take a minute or more; the participant keeps the extension window open.
+- **Text only.** Images, files, canvas, tool use and reasoning are not exported. A message with only an attachment has empty `Text`.
+- **Only the version on screen.** Edited messages and regenerated replies keep only the version the chat shows.
 
 ## Troubleshooting
 
 | Message | What to do |
 | --- | --- |
-| "Open Replika, a one-to-one Kindroid chat, a Claude chat, a ChatGPT chat or a Gemini chat in this tab..." | Open the chat itself (address `chatgpt.com/c/...`), not the home page, a temporary chat, a GPT's page, a project page or a shared link, and reopen the extension. |
+| "Open Replika, a one-to-one Kindroid chat, a Claude chat, a ChatGPT chat or a Gemini chat in this tab..." | Open the chat itself (address `chatgpt.com/c/...`) and reopen the extension. |
 | "Sign in to ChatGPT in this tab, refresh the page, then try again." | Sign in to ChatGPT in the same tab and refresh. |
-| "ChatGPT has not finished its last reply in this chat..." | Wait for the reply to finish. If it stopped with an error, click Try again on the reply, then export again. |
-| "ChatGPT could not find this chat..." | Open the chat from ChatGPT's sidebar. The participant may be signed in to a different account, or the chat was deleted. |
+| "ChatGPT has not finished its last reply in this chat..." | Wait for the reply to finish, then export again. |
+| "ChatGPT could not find this chat..." | Open the chat from ChatGPT's sidebar. |
 | "ChatGPT is limiting requests..." | Wait a few minutes and export again. |
-| "Could not read from ChatGPT..." or "Could not read the ChatGPT tab..." | Check the internet connection, refresh the ChatGPT page and try again. |
-| "ChatGPT returned a kind of message CompanionLink cannot export yet..." | Record the message and the chat's dates: the extension needs an update for this kind of message. |
-| "ChatGPT returned an unexpected response", "an incomplete chat", "an invalid chat message" or "an error (HTTP ...)" | Retry once. If it repeats, record the exact message: ChatGPT may have changed its website, and the extension may need an update. |
-| "0 messages exported" | Check the chat and the dates; dates with no messages give a file with only the column names. |
-| The extension closed before the download | Export again; nothing partial is saved. |
+| Any other error | Refresh the ChatGPT page and try once more. If it repeats, record the exact message: the extension may need an update. |

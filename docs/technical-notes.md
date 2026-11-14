@@ -47,9 +47,9 @@ Kindroid uses the same columns and order: participant messages use `Me` and the 
 
 Claude also uses the same columns and order: participant messages use `Me` and Claude's use `Claude`; Reaction is `N/A`. One file holds one chat, the chat open in the tab, and only the versions shown on screen: older versions left by edits and regenerated replies are not exported. Text is the message's text blocks as written: adjacent blocks (a cited sentence split across blocks) join directly, and text resuming after any other block, such as a tool call, starts a new paragraph. A reply's time is when Claude finished it.
 
-ChatGPT uses the same columns and order: participant messages use `Me` and ChatGPT's use `ChatGPT`; Reaction is `N/A`. One file holds one chat, the chat open in the tab, and only the versions shown on screen. Text is the message's text parts and voice transcripts as written, joined by a blank line; images, files, canvas documents, tool calls and results, reasoning, memory updates and hidden messages are left out. A participant message with only an attachment keeps its row with empty Text. Rows follow ChatGPT's list order, newest first; its message times can be out of that order by a few seconds (observed).
+ChatGPT uses the same columns and order: participant messages use `Me` and ChatGPT's use `ChatGPT`; Reaction is `N/A`. One file holds one chat, only the versions shown on screen. Text is the message's text and voice transcripts; images, files, canvas, tool use and reasoning are left out.
 
-Gemini uses the same columns: the AI's messages use `Gemini`, and Reaction is `N/A`. Gemini stores a prompt and its reply as one turn with one time, so each turn gives two rows with the same timestamps, the `Gemini` reply directly above the `Me` prompt; turns are newest first. Text is the prompt and the reply draft shown on screen, as written. Cards in a reply (products, maps, hotels, videos, generated images and others) stay in Text as Gemini's placeholder links, such as `http://googleusercontent.com/shopping_content/0`; their content is not exported.
+Gemini uses the same columns: the AI's messages use `Gemini`, and Reaction is `N/A`. A prompt and its reply are one turn with one time, so each turn gives two rows with the same timestamps, the reply above the prompt. Cards in a reply stay in Text as placeholder links.
 
 ## How Each Export Works And When It Stops
 
@@ -112,47 +112,23 @@ with `cache: "no-store"`.
 
 ### ChatGPT
 
-The extension reads chatgpt.com's own web API, which is undocumented, by running one
-function inside the participant's chatgpt.com tab. That function asks the site's
-session endpoint for the account's access token, then asks for the chat with it, 100
-messages per request, newest first, following each page's earliest message back. It
-stops paging at the chat's start or once a page's oldest exportable message is more
-than a day before the From date; the day of slack covers message times that are out
-of list order by seconds.
-
-It stops with an error if the extension cannot run in the tab; on a 401 or 403 (signed
-out), a 429, a 404 for the chat on the first request, or any other HTTP error; on a
-network failure, a request that takes over 60 seconds or a response that is not JSON;
-on a response not in the expected shape or for another chat; on an empty older page
-or a repeated message ID; and on a message without a sender, a content type or a
-plausible time. It also stops when the chat's newest message is not the last one
-listed, or a reply in the dates is still being written, since exporting would drop
-words, and when a message in the dates of a kind it does not know has text. The time
-of every exportable message is checked; content only in the selected dates.
-Responses are fetched with `cache: "no-store"`.
+One function runs inside the participant's chatgpt.com tab. It gets the account's access
+token from the site's session endpoint and reads the chat through chatgpt.com's own
+undocumented web API, newest first, paging back until it passes the From date. It stops
+with an error on any failed request, an unexpected response, a reply still being
+written, or a kind of message it does not know.
 
 ### Gemini
 
-The extension reads gemini.google.com's own web API, which is undocumented, by running
-one function inside the participant's gemini.google.com tab. That function reads the
-page's request token, build label and session ID from the text of the page's scripts,
-then sends the page's own chat-history request (`hNvQHb`), 10 turns per request,
-newest first, following each page's cursor back, one second apart. It stops paging at
-the chat's first turn or once a page's oldest turn is before the From date.
-
-It stops with an error if the extension cannot run in the tab or the page has no
-token (signed out); on a 400, 401 or 403 (most likely a stale token), a 429 or any
-other HTTP error; on a network failure, a request that takes over 60 seconds or a
-response without Gemini's guard line; on a response not in the expected shape or for
-another chat; on an empty older page, or a turn that does not link to the next newer
-one (a gap, an overlap or a repeated page); on a turn without an ID or a plausible
-time, or with a time later than the newer turn's. In the dates, it also stops when the
-chat's newest reply is unfinished or empty, and when an older reply is empty or holds
-a card it does not read. Responses are fetched with `cache: "no-store"`.
+One function runs inside the participant's gemini.google.com tab. It reads the page's
+request token and sends the page's own chat-history request, 10 turns per request, one
+second apart, newest first, until it passes the From date. It stops with an error on any
+failed request, an unexpected response, a reply still being written, or a reply it
+cannot read.
 
 ## Privacy And Browser Permissions
 
-The extension uses the participant's active Replika web session, the Kindroid API key the participant pastes, or the Claude, ChatGPT or Gemini sign-in already in their browser, locally in Chrome to request their chat history. For Claude, requests run inside the participant's claude.ai tab, so the browser attaches the sign-in; the extension never reads it. For ChatGPT and Gemini, requests also run inside the participant's tab, and the function there reads the token the site's own requests use (ChatGPT's access token; Gemini's request token, build label and session ID). These values stay inside that function and go only to the same site, in its requests; only the chat's records or an error code leave the tab.
+The extension uses the participant's active Replika web session, the Kindroid API key the participant pastes, or the Claude, ChatGPT or Gemini sign-in already in their browser, locally in Chrome to request their chat history. For Claude, requests run inside the participant's claude.ai tab, so the browser attaches the sign-in; the extension never reads it. For ChatGPT and Gemini, requests also run inside the participant's tab, using the token the site's own requests use. The token stays inside the tab and goes only to the same site; only the chat's messages or an error code leave the tab.
 
 The extension does not:
 
@@ -218,8 +194,7 @@ The tests cover:
 - Replika v17 event sequencing and history pagination;
 - Kindroid paging, validation, error messages, request pacing and cache mode;
 - Claude chat-page matching, organization lookup, the visible branch, validation, text joining, error messages and the in-tab request;
-- ChatGPT chat-page matching, paging and its stop rule, message filters, validation, error messages and timeouts;
-- Gemini chat-page matching, page values, paging, pacing, the turn chain, validation and error messages;
+- ChatGPT and Gemini chat-page matching, paging, validation and error messages;
 - study-window filtering;
 - extension files, permissions, and participant-facing copy;
 - platform detection when the popup opens;

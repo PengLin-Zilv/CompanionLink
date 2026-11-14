@@ -22,10 +22,6 @@ Have these items ready:
 3. Click **Add extension** to confirm.
 4. Open Chrome's Extensions menu and select **CompanionLink**.
 
-If CompanionLink is already installed, Chrome updates it automatically. If, on a
-Gemini chat, CompanionLink asks you to open another app without mentioning Gemini,
-remove CompanionLink and install it again from the link.
-
 ## Export Each Chat
 
 CompanionLink exports one chat at a time: the chat open in the tab. **Export each chat
@@ -57,8 +53,7 @@ the files using the method provided by the research team.
 
 ### "Open Replika, a one-to-one Kindroid chat, a Claude chat, a ChatGPT chat or a Gemini chat in this tab..."
 
-Open the chat itself from the list of chats on the left. The Gemini home page, a Gem's
-page or a shared link cannot be exported. Then click the extension again.
+Open the chat itself from the list of chats on the left, then click the extension again.
 
 ### "Sign in to Gemini in this tab, refresh the page, then try again."
 
