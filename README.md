@@ -3,7 +3,7 @@
 
 CompanionLink is a Chrome extension for collecting conversation data, with participants' consent, in studies of human–AI interaction. Participants use it to export their own chat history with a conversational AI app, for the dates a study sets, into one consistent CSV format. The export runs entirely in the participant's browser: nothing is sent to the researchers or to any server, and participants share the file through the study's own procedure.
 
-Chat apps' own exports, where they exist, rarely suit research: they may cover a whole account, cannot be limited to study dates, or differ in format from app to app. CompanionLink gives every participant the same steps and every study the same columns, with each message's time in the participant's time zone and in UTC. It currently supports Replika, Kindroid and Claude; each app has its own connector, while the output format, date handling and privacy model are shared.
+Chat apps' own exports, where they exist, rarely suit research: they may cover a whole account, cannot be limited to study dates, or differ in format from app to app. CompanionLink gives every participant the same steps and every study the same columns, with each message's time in the participant's time zone and in UTC. It currently supports Replika, Kindroid, Claude, ChatGPT and Gemini; each app has its own connector, while the output format, date handling and privacy model are shared.
 
 ## Supported Apps
 
@@ -12,10 +12,12 @@ Chat apps' own exports, where they exist, rarely suit research: they may cover a
 | Replika | [my.replika.com](https://my.replika.com) | Text messages and reactions |
 | Kindroid | A one-to-one chat with their Kin on [kindroid.ai](https://kindroid.ai), plus their own Kindroid API key | Text messages |
 | Claude | The chat they are sharing on [claude.ai](https://claude.ai) (one chat per file) | Text messages |
+| ChatGPT | The chat they are sharing on [chatgpt.com](https://chatgpt.com) (one chat per file) | Text messages, including voice transcripts |
+| Gemini | The chat they are sharing on [gemini.google.com](https://gemini.google.com) (one chat per file) | Text messages |
 
-Images, voice messages, attachments and other app data, such as memories or profiles, are not exported. A message that was only an image keeps its row, with empty text.
+Images, voice recordings, attachments and other app data, such as memories or profiles, are not exported; ChatGPT voice messages give their transcript. A message that was only an image keeps its row, with empty text.
 
-Claude support was added in version 0.3.0.
+Claude support was added in version 0.3.0, and ChatGPT and Gemini support in 0.4.0.
 
 ## Install
 
@@ -44,25 +46,25 @@ One row per message, newest first, in seven columns:
 | `Local_Timezone` | That time zone, such as `America/Los_Angeles` |
 | `Timestamp_UTC` | The exact time in UTC; use it to match messages to study events and to measure time between messages |
 | `Timestamp_Eastern` | The same time in US Eastern Time |
-| `From` | `Me` for the participant; `Rep`, `Kin` or `Claude` for the companion |
+| `From` | `Me` for the participant; `Rep`, `Kin`, `Claude`, `ChatGPT` or `Gemini` for the AI |
 | `Text` | The message as written, line breaks included |
-| `Reaction` | Replika's reaction, or `None`; `N/A` for Kindroid and Claude (not available) |
+| `Reaction` | Replika's reaction, or `None`; `N/A` for the other apps (not available) |
 
 The file opens correctly in Excel. In R, read it with `fileEncoding = "UTF-8-BOM"`; in Python, open it with `open(path, encoding="utf-8-sig", newline="")`. Dates with no messages give a file with only the column names.
 
 ## Privacy
 
 - The extension runs only in the participant's browser, and exports only when they click **Export Chat Log**.
-- It reads the participant's own chat with their existing sign-in (Replika and Claude) or with the API key they paste (Kindroid). It never asks for a password and never saves the key. For Replika, the sign-in is picked up when the Replika page loads.
+- It reads the participant's own chat with their existing sign-in (Replika, Claude, ChatGPT and Gemini) or with the API key they paste (Kindroid). It never asks for a password and never saves the key. For Replika, the sign-in is picked up when the Replika page loads.
 - The only output is the CSV on the participant's computer. Nothing is sent to the research team, the developers or any other server.
 
 See the full [privacy policy](https://penglin-zilv.github.io/companion-chat-log-export-privacy/).
 
 ## Limits To Plan For
 
-- **Website changes.** Replika and Claude are read through each app's own website, not an official API, so a website change can stop exports until the extension is updated. The extension then shows an error and saves nothing, never a partial file. Kindroid uses its official API.
-- **Export time.** Kindroid limits how fast data can be requested, so long histories pause and can take several minutes. Participants keep the extension window open until the file downloads.
-- **One Claude chat per file.** Participants choose which Claude chats to share.
+- **Website changes.** Replika, Claude, ChatGPT and Gemini are read through each app's own website, not an official API, so a website change can stop exports until the extension is updated. The extension then shows an error and saves nothing, never a partial file. Kindroid uses its official API.
+- **Export time.** Kindroid limits how fast data can be requested, so long histories pause and can take several minutes. Long ChatGPT and Gemini chats can also take a minute or more. Participants keep the extension window open until the file downloads.
+- **One chat per file for Claude, ChatGPT and Gemini.** Participants choose which chats to share.
 - **Terms and ethics.** Review each app's terms and your ethics board's requirements before using CompanionLink in a study.
 
 ## Guides
@@ -72,6 +74,8 @@ See the full [privacy policy](https://penglin-zilv.github.io/companion-chat-log-
 | Replika | [Participant instructions](docs/replika/participant-guide.md) | [Researcher guide](docs/replika/researcher-guide.md) |
 | Kindroid | [Participant instructions](docs/kindroid/participant-guide.md) | [Researcher guide](docs/kindroid/researcher-guide.md) |
 | Claude | [Participant instructions](docs/claude/participant-guide.md) | [Researcher guide](docs/claude/researcher-guide.md) |
+| ChatGPT | [Participant instructions](docs/chatgpt/participant-guide.md) | [Researcher guide](docs/chatgpt/researcher-guide.md) |
+| Gemini | [Participant instructions](docs/gemini/participant-guide.md) | [Researcher guide](docs/gemini/researcher-guide.md) |
 
 ## Technical Details
 

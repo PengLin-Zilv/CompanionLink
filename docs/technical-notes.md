@@ -47,6 +47,10 @@ Kindroid uses the same columns and order: participant messages use `Me` and the 
 
 Claude also uses the same columns and order: participant messages use `Me` and Claude's use `Claude`; Reaction is `N/A`. One file holds one chat, the chat open in the tab, and only the versions shown on screen: older versions left by edits and regenerated replies are not exported. Text is the message's text blocks as written: adjacent blocks (a cited sentence split across blocks) join directly, and text resuming after any other block, such as a tool call, starts a new paragraph. A reply's time is when Claude finished it.
 
+ChatGPT uses the same columns and order: participant messages use `Me` and ChatGPT's use `ChatGPT`; Reaction is `N/A`. One file holds one chat, only the versions shown on screen. Text is the message's text and voice transcripts; images, files, canvas, tool use and reasoning are left out.
+
+Gemini uses the same columns: the AI's messages use `Gemini`, and Reaction is `N/A`. A prompt and its reply are one turn with one time, so each turn gives two rows with the same timestamps, the reply above the prompt. Cards in a reply stay in Text as placeholder links.
+
 ## How Each Export Works And When It Stops
 
 On every platform, a failed export downloads nothing: there is never a partial CSV.
@@ -106,9 +110,25 @@ as it got. The time of every message on the visible branch is checked; ID, sende
 content are checked only for messages in the selected dates. Responses are fetched
 with `cache: "no-store"`.
 
+### ChatGPT
+
+One function runs inside the participant's chatgpt.com tab. It gets the account's access
+token from the site's session endpoint and reads the chat through chatgpt.com's own
+undocumented web API, newest first, paging back until it passes the From date. It stops
+with an error on any failed request, an unexpected response, a reply still being
+written, or a kind of message it does not know.
+
+### Gemini
+
+One function runs inside the participant's gemini.google.com tab. It reads the page's
+request token and sends the page's own chat-history request, 10 turns per request, one
+second apart, newest first, until it passes the From date. It stops with an error on any
+failed request, an unexpected response, a reply still being written, or a reply it
+cannot read.
+
 ## Privacy And Browser Permissions
 
-The extension uses the participant's active Replika web session, the Kindroid API key the participant pastes, or the Claude sign-in already in their browser, locally in Chrome to request their chat history. For Claude, requests run inside the participant's claude.ai tab, so the browser attaches the sign-in; the extension never reads it.
+The extension uses the participant's active Replika web session, the Kindroid API key the participant pastes, or the Claude, ChatGPT or Gemini sign-in already in their browser, locally in Chrome to request their chat history. For Claude, requests run inside the participant's claude.ai tab, so the browser attaches the sign-in; the extension never reads it. For ChatGPT and Gemini, requests also run inside the participant's tab, using the token the site's own requests use. The token stays inside the tab and goes only to the same site; only the chat's messages or an error code leave the tab.
 
 The extension does not:
 
@@ -143,6 +163,10 @@ Claude adds no permission either. On a Claude chat, the temporary access that
 function in that tab, in the extension's isolated world, only after **Export Chat
 Log** is clicked. No script runs on claude.ai at page load.
 
+ChatGPT and Gemini add no permission either. They use the same `activeTab` and
+`scripting` access as Claude, on a chatgpt.com or gemini.google.com chat, only after
+**Export Chat Log** is clicked. No script runs on those sites at page load.
+
 ## Development
 
 The extension uses plain JavaScript, HTML, CSS, and Chrome Manifest V3. It has no runtime package dependencies. The tests require Node.js 22.6 or newer.
@@ -170,12 +194,13 @@ The tests cover:
 - Replika v17 event sequencing and history pagination;
 - Kindroid paging, validation, error messages, request pacing and cache mode;
 - Claude chat-page matching, organization lookup, the visible branch, validation, text joining, error messages and the in-tab request;
+- ChatGPT and Gemini chat-page matching, paging, validation and error messages;
 - study-window filtering;
 - extension files, permissions, and participant-facing copy;
 - platform detection when the popup opens;
-- popup submission through CSV download with simulated browser/network boundaries in multiple time zones, with byte-exact golden files for Replika, Kindroid and Claude.
+- popup submission through CSV download with simulated browser/network boundaries in multiple time zones, with byte-exact golden files for Replika, Kindroid, Claude, ChatGPT and Gemini.
 
-A complete release check also requires manual exports from an authenticated Replika web account, a Kindroid account and a Claude account.
+A complete release check also requires manual exports from an authenticated Replika web account, a Kindroid account, a Claude account, a ChatGPT account and a Gemini account.
 
 ```text
 extension/     Chrome extension source
@@ -183,6 +208,8 @@ tests/         Automated tests
 docs/replika/  Replika guides and visual workflow
 docs/kindroid/ Kindroid guides
 docs/claude/   Claude guides
+docs/chatgpt/  ChatGPT guides
+docs/gemini/   Gemini guides
 ```
 
 ## Versioning And Releases
@@ -202,6 +229,7 @@ While the major version is `0`, the CSV schema is not frozen, and a breaking cha
 | `0.2.0` | Kindroid support |
 | `0.2.1` | Rewords the Kindroid privacy note |
 | `0.3.0` | Claude support: the chat open in the tab, same eight-column CSV |
+| `0.4.0` | ChatGPT and Gemini support; the CSV drops the `ID` column and has seven columns |
 | later `0.x.0` | Each further platform, feature or CSV column change |
 | `1.0.0` | CSV schema frozen for a running study |
 

@@ -1,6 +1,6 @@
 # Researcher Guide: Kindroid
 
-> This guide covers Kindroid; see the [Replika](../replika/researcher-guide.md) and [Claude](../claude/researcher-guide.md) researcher guides for those apps. The extension reads the participant's chat through Kindroid's official API with the participant's own API key and downloads the CSV to their computer.
+> This guide covers Kindroid; see the [Replika](../replika/researcher-guide.md), [Claude](../claude/researcher-guide.md), [ChatGPT](../chatgpt/researcher-guide.md) and [Gemini](../gemini/researcher-guide.md) researcher guides for those apps. The extension reads the participant's chat through Kindroid's official API with the participant's own API key and downloads the CSV to their computer.
 
 ## Before Each Participant Session
 
